@@ -31,9 +31,19 @@ export function PreviewApp() {
     if (nums.length) setInput((p) => ({ ...p, array: nums }));
   }
 
+  function setWords(text: string) {
+    const words = text
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (words.length) setInput((p) => ({ ...p, words }));
+  }
+
   function setParam(key: string, value: number) {
     setInput((p) => ({ ...p, params: { ...p.params, [key]: value } }));
   }
+
+  const sliderMax = Math.max(20, ...(input.array ?? [20]));
 
   return (
     <div className="app preview-mode">
@@ -59,16 +69,42 @@ export function PreviewApp() {
             <h3>
               Inputs <span className="muted">— same input, same trace (deterministic)</span>
             </h3>
-            <label className="knob">
-              <span>array</span>
-              <input
-                type="text"
-                key={selectedId}
-                defaultValue={input.array.join(', ')}
-                onBlur={(e) => setArray(e.target.value)}
-                aria-label="array values"
-              />
-            </label>
+            {input.array && (
+              <label className="knob">
+                <span>array</span>
+                <input
+                  type="text"
+                  key={selectedId + 'arr'}
+                  defaultValue={input.array.join(', ')}
+                  onBlur={(e) => setArray(e.target.value)}
+                  aria-label="array values"
+                />
+              </label>
+            )}
+            {input.words && (
+              <label className="knob">
+                <span>words</span>
+                <input
+                  type="text"
+                  key={selectedId + 'words'}
+                  defaultValue={input.words.join(', ')}
+                  onBlur={(e) => setWords(e.target.value)}
+                  aria-label="words"
+                />
+              </label>
+            )}
+            {input.text !== undefined && (
+              <label className="knob">
+                <span>text</span>
+                <input
+                  type="text"
+                  key={selectedId + 'text'}
+                  defaultValue={input.text}
+                  onBlur={(e) => setInput((p) => ({ ...p, text: e.target.value }))}
+                  aria-label="text"
+                />
+              </label>
+            )}
             {Object.entries(input.params ?? {}).map(([k, v]) => (
               <label className="knob" key={k}>
                 <span>
@@ -77,7 +113,7 @@ export function PreviewApp() {
                 <input
                   type="range"
                   min={1}
-                  max={Math.max(20, ...input.array)}
+                  max={sliderMax}
                   value={v}
                   onChange={(e) => setParam(k, Number(e.target.value))}
                   aria-label={k}

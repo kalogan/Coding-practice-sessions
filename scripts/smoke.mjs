@@ -75,27 +75,37 @@ async function check(name, path, mustContain) {
   page.on('pageerror', (e) => errors.push(String(e)));
 
   await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
-  // drive it: the visualization must actually mount and produce array cells
-  await page.waitForSelector('[data-testid="array-view"]', { timeout: 5000 }).catch(() => {});
-  const cells = await page.locator('[data-testid^="cell-"]').count();
-  const note = (await page.locator('[data-testid="step-note"]').first().textContent()) ?? '';
-  const text = await page.locator('#root').textContent();
+  await page.waitForSelector('[data-testid="step-view"]', { timeout: 5000 }).catch(() => {});
 
-  // step forward once to prove the player drives the real trace
-  const play = page.locator('[data-testid="play"]');
-  if (await play.count()) await play.click();
-  await page.waitForTimeout(400);
-  const counter = (await page.locator('[data-testid="step-counter"]').first().textContent()) ?? '';
+  // drive EVERY algorithm in the picker — each must mount some view, render a
+  // note, and advance one step without throwing. A renderer that breaks for one
+  // view kind fails here (a per-topic green-but-broken catcher).
+  const items = page.locator('.picker-item');
+  const count = await items.count();
+  let drivenViews = 0;
+  for (let i = 0; i < count; i++) {
+    await items.nth(i).click();
+    await page.waitForTimeout(120);
+    const rendered = await page.locator('[data-testid="step-view"] *').count();
+    const note = (await page.locator('[data-testid="step-note"]').first().textContent()) ?? '';
+    if (rendered > 0 && note.length > 0) drivenViews++;
+    else errors.push(`picker item ${i}: rendered=${rendered} note="${note.slice(0, 30)}"`);
+    // step forward once to prove the player drives the real trace
+    const play = page.locator('[data-testid="play"]');
+    if (await play.count()) await play.click();
+    await page.waitForTimeout(200);
+    if (await play.count()) await play.click(); // pause
+  }
+  const text = (await page.locator('#root').textContent()) ?? '';
 
   const shot = join(process.cwd(), `scratchpad-smoke-${name}.png`);
   await page.screenshot({ path: shot, fullPage: true }).catch(() => {});
 
-  const ok =
-    errors.length === 0 && cells > 0 && note.length > 0 && (text ?? '').includes(mustContain);
+  const ok = errors.length === 0 && drivenViews === count && count > 0 && text.includes(mustContain);
   console.log(
-    `[${ok ? 'PASS' : 'FAIL'}] ${name} (${path})  cells=${cells} step=${counter} consoleErrors=${errors.length}`,
+    `[${ok ? 'PASS' : 'FAIL'}] ${name} (${path})  algos=${count} driven=${drivenViews} consoleErrors=${errors.length}`,
   );
-  if (errors.length) console.log('   console:', errors.join(' | '));
+  if (errors.length) console.log('   issues:', errors.join(' | '));
   if (!ok) failed = true;
   await page.close();
 }

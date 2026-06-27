@@ -1,4 +1,4 @@
-import type { AlgoDescriptor, AlgoInput, AlgoResult } from '../types';
+import type { AlgoDescriptor, AlgoInput, AlgoResult, Marker } from '../types';
 import { Tracer } from '../tracer';
 
 // Variable-size sliding window.
@@ -6,9 +6,14 @@ import { Tracer } from '../tracer';
 // Find the LONGEST run of *consecutive* messages that fits within the budget.
 
 function run(input: AlgoInput): AlgoResult {
-  const tokens = input.array;
+  const tokens = input.array ?? [];
   const budget = input.params?.budget ?? 0;
   const t = new Tracer();
+
+  const markers = (left: number, right: number): Marker[] => [
+    { index: left, role: 'left', label: 'L' },
+    { index: right, role: 'right', label: 'R' },
+  ];
 
   let left = 0;
   let sum = 0;
@@ -19,11 +24,7 @@ function run(input: AlgoInput): AlgoResult {
     // grow the window to the right
     sum += tokens[right];
     t.step({
-      markers: [
-        { index: left, role: 'left', label: 'L' },
-        { index: right, role: 'right', label: 'R' },
-      ],
-      window: { start: left, end: right },
+      view: { kind: 'array', values: tokens, markers: markers(left, right), window: { start: left, end: right } },
       state: [
         { label: 'window tokens', value: sum, highlight: sum > budget },
         { label: 'budget', value: budget },
@@ -37,11 +38,7 @@ function run(input: AlgoInput): AlgoResult {
       sum -= tokens[left];
       left++;
       t.step({
-        markers: [
-          { index: left, role: 'left', label: 'L' },
-          { index: right, role: 'right', label: 'R' },
-        ],
-        window: { start: left, end: right },
+        view: { kind: 'array', values: tokens, markers: markers(left, right), window: { start: left, end: right } },
         state: [
           { label: 'window tokens', value: sum, highlight: sum > budget },
           { label: 'budget', value: budget },
@@ -57,11 +54,7 @@ function run(input: AlgoInput): AlgoResult {
       best = len;
       bestStart = left;
       t.step({
-        markers: [
-          { index: left, role: 'left', label: 'L' },
-          { index: right, role: 'right', label: 'R' },
-        ],
-        window: { start: left, end: right },
+        view: { kind: 'array', values: tokens, markers: markers(left, right), window: { start: left, end: right } },
         state: [
           { label: 'window tokens', value: sum },
           { label: 'budget', value: budget },
@@ -74,11 +67,15 @@ function run(input: AlgoInput): AlgoResult {
 
   // final answer
   t.step({
-    markers: [
-      { index: bestStart, role: 'window' },
-      { index: bestStart + best - 1, role: 'window' },
-    ],
-    window: { start: bestStart, end: bestStart + best - 1 },
+    view: {
+      kind: 'array',
+      values: tokens,
+      markers: [
+        { index: bestStart, role: 'window' },
+        { index: bestStart + best - 1, role: 'window' },
+      ],
+      window: { start: bestStart, end: bestStart + best - 1 },
+    },
     state: [{ label: 'answer', value: best, highlight: true }],
     note: `Done. Longest fitting segment: messages ${bestStart}–${bestStart + best - 1} (${best} messages).`,
   });
@@ -96,6 +93,7 @@ const descriptor: AlgoDescriptor = {
     'Variable-size window: grow R to include more; while the window breaks the constraint, shrink L. Track the best valid window. O(n) — each index enters and leaves once.',
   complexity: 'O(n) time · O(1) space',
   defaultInput: { array: [3, 1, 4, 1, 5, 9, 2, 6], params: { budget: 10 } },
+  expected: 4,
   run,
   code: `function longestSegment(tokens, budget) {
   let left = 0, sum = 0, best = 0;

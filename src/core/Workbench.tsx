@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { AlgoDescriptor, AlgoInput } from '../algorithms/types';
-import { ArrayView } from '../harness/ArrayView';
+import { StepView } from '../harness/StepView';
 import { Controls } from '../harness/Controls';
 import { StatePanel } from '../harness/StatePanel';
 import { StepLog } from '../harness/StepLog';
@@ -55,7 +55,7 @@ export function Workbench({ algo, input, children }: Props) {
 
       {children}
 
-      <ArrayView array={input.array} step={step} />
+      <StepView step={step} />
 
       <Controls
         stepIndex={clamped}

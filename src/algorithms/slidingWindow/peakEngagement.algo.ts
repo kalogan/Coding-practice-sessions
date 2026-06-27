@@ -1,4 +1,4 @@
-import type { AlgoDescriptor, AlgoInput, AlgoResult } from '../types';
+import type { AlgoDescriptor, AlgoInput, AlgoResult, Marker } from '../types';
 import { Tracer } from '../tracer';
 
 // Fixed-size sliding window.
@@ -7,9 +7,14 @@ import { Tracer } from '../tracer';
 // previous sum instead of recomputing it (add the new, drop the old).
 
 function run(input: AlgoInput): AlgoResult {
-  const reactions = input.array;
+  const reactions = input.array ?? [];
   const k = input.params?.k ?? 1;
   const t = new Tracer();
+
+  const ends = (left: number, right: number): Marker[] => [
+    { index: left, role: 'left', label: 'start' },
+    { index: right, role: 'right', label: 'end' },
+  ];
 
   // first window: posts 0..k-1
   let sum = 0;
@@ -18,11 +23,7 @@ function run(input: AlgoInput): AlgoResult {
   let bestStart = 0;
 
   t.step({
-    markers: [
-      { index: 0, role: 'left', label: 'start' },
-      { index: k - 1, role: 'right', label: 'end' },
-    ],
-    window: { start: 0, end: k - 1 },
+    view: { kind: 'array', values: reactions, markers: ends(0, k - 1), window: { start: 0, end: k - 1 } },
     state: [
       { label: 'window sum', value: sum },
       { label: 'window size k', value: k },
@@ -41,11 +42,7 @@ function run(input: AlgoInput): AlgoResult {
       bestStart = left;
     }
     t.step({
-      markers: [
-        { index: left, role: 'left', label: 'start' },
-        { index: right, role: 'right', label: 'end' },
-      ],
-      window: { start: left, end: right },
+      view: { kind: 'array', values: reactions, markers: ends(left, right), window: { start: left, end: right } },
       state: [
         { label: 'window sum', value: sum, highlight: improved },
         { label: 'window size k', value: k },
@@ -59,11 +56,15 @@ function run(input: AlgoInput): AlgoResult {
 
   // final answer
   t.step({
-    markers: [
-      { index: bestStart, role: 'window' },
-      { index: bestStart + k - 1, role: 'window' },
-    ],
-    window: { start: bestStart, end: bestStart + k - 1 },
+    view: {
+      kind: 'array',
+      values: reactions,
+      markers: [
+        { index: bestStart, role: 'window' },
+        { index: bestStart + k - 1, role: 'window' },
+      ],
+      window: { start: bestStart, end: bestStart + k - 1 },
+    },
     state: [{ label: 'answer', value: best, highlight: true }],
     note: `Done. Peak engagement: posts ${bestStart}–${bestStart + k - 1} with ${best} total reactions.`,
   });
@@ -81,6 +82,7 @@ const descriptor: AlgoDescriptor = {
     'Fixed-size window: compute the first window once, then slide by adding the incoming element and subtracting the outgoing one. Avoids recomputing the whole sum — O(n) instead of O(n·k).',
   complexity: 'O(n) time · O(1) space',
   defaultInput: { array: [2, 1, 5, 1, 3, 2], params: { k: 3 } },
+  expected: 9,
   run,
   code: `function peakEngagement(reactions, k) {
   let sum = 0;
