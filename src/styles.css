@@ -244,7 +244,9 @@ body {
   border-radius: var(--radius);
   min-height: 240px;
 }
-.token {
+/* NOTE: scoped under .tokens-view — Prism's syntax highlighter ALSO emits
+   class="token", so an unscoped .token rule would box every code token. */
+.tokens-view .token {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -257,7 +259,7 @@ body {
   font-size: 14px;
   transition: background 0.15s, border-color 0.15s;
 }
-.token.in-window {
+.tokens-view .token.in-window {
   box-shadow: 0 0 0 2px var(--accent) inset;
 }
 .token-label {
@@ -265,24 +267,24 @@ body {
   color: var(--muted);
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
-.token.role-match {
+.tokens-view .token.role-match {
   border-color: var(--accent-2);
   color: var(--accent-2);
 }
-.token.role-active {
+.tokens-view .token.role-active {
   border-color: var(--accent);
   color: var(--accent);
 }
-.token.role-kept {
+.tokens-view .token.role-kept {
   border-color: var(--accent-2);
 }
-.token.role-cleared,
-.token.role-dropped {
+.tokens-view .token.role-cleared,
+.tokens-view .token.role-dropped {
   border-color: var(--line);
   opacity: 0.4;
   text-decoration: line-through;
 }
-.token.role-invalid {
+.tokens-view .token.role-invalid {
   border-color: #f85149;
   color: #f85149;
 }

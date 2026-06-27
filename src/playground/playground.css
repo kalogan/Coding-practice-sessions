@@ -31,8 +31,13 @@
   margin: 22px 0 14px;
 }
 
-/* editor */
+/* editor — transparent textarea over a highlighted <pre>.
+   The two layers MUST share identical metrics or the caret drifts. */
 .editor {
+  --editor-font: ui-monospace, Menlo, Consolas, monospace;
+  --editor-size: 13px;
+  --editor-line: 1.5;
+  --editor-pad: 12px 14px;
   display: flex;
   min-width: 0;
   background: var(--panel);
@@ -46,31 +51,81 @@
   padding: 12px 8px 12px 12px;
   background: var(--panel-2);
   color: var(--muted);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.5;
+  font-family: var(--editor-font);
+  font-size: var(--editor-size);
+  line-height: var(--editor-line);
   text-align: right;
   user-select: none;
   overflow: hidden;
 }
 .editor-gutter .ln {
-  height: calc(13px * 1.5);
+  height: calc(var(--editor-size) * var(--editor-line));
 }
-.editor-area {
+.editor-code {
+  position: relative;
   flex: 1;
   min-width: 0;
-  border: none;
-  resize: none;
-  padding: 12px 14px;
-  background: transparent;
-  color: #c9d1d9;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.5;
+}
+.editor-highlight,
+.editor-area {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  border: 0;
+  padding: var(--editor-pad);
+  font-family: var(--editor-font);
+  font-size: var(--editor-size);
+  line-height: var(--editor-line);
   tab-size: 2;
-  outline: none;
   white-space: pre;
+  word-wrap: normal;
   overflow: auto;
+}
+.editor-highlight {
+  z-index: 0;
+  pointer-events: none;
+  color: #c9d1d9;
+  overflow: hidden;
+}
+.editor-highlight code {
+  font: inherit;
+}
+.editor-area {
+  z-index: 1;
+  resize: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  outline: none;
+}
+
+/* Prism token theme (matched to the app palette) */
+.editor-highlight .token.comment {
+  color: #8b949e;
+  font-style: italic;
+}
+.editor-highlight .token.keyword,
+.editor-highlight .token.boolean {
+  color: #ff7b72;
+}
+.editor-highlight .token.string,
+.editor-highlight .token.template-string,
+.editor-highlight .token.char {
+  color: #a5d6ff;
+}
+.editor-highlight .token.number {
+  color: #79c0ff;
+}
+.editor-highlight .token.function,
+.editor-highlight .token.class-name {
+  color: #d2a8ff;
+}
+.editor-highlight .token.builtin {
+  color: #79c0ff;
+}
+.editor-highlight .token.operator,
+.editor-highlight .token.punctuation {
+  color: #c9d1d9;
 }
 
 /* input column */

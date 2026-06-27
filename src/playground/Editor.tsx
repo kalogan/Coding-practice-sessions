@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import type { KeyboardEvent, UIEvent } from 'react';
+import { highlight } from './highlight';
 
 interface Props {
   value: string;
@@ -7,15 +8,19 @@ interface Props {
   language: string;
 }
 
-// Lightweight line-numbered code editor (a textarea + a synced gutter). No
-// heavyweight editor dependency; Tab inserts two spaces.
+// Line-numbered code editor with syntax highlighting. A transparent textarea
+// sits on top of a Prism-highlighted <pre>; both share identical metrics so the
+// caret lines up with the colours. Tab inserts two spaces; scroll stays synced.
 export function Editor({ value, onChange, language }: Props) {
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
+
   const lines = useMemo(
     () => Array.from({ length: value.split('\n').length }, (_, i) => i + 1),
     [value],
   );
+  const html = useMemo(() => highlight(value, language), [value, language]);
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Tab') {
@@ -31,7 +36,12 @@ export function Editor({ value, onChange, language }: Props) {
   }
 
   function onScroll(e: UIEvent<HTMLTextAreaElement>) {
-    if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
+    const t = e.currentTarget;
+    if (preRef.current) {
+      preRef.current.scrollTop = t.scrollTop;
+      preRef.current.scrollLeft = t.scrollLeft;
+    }
+    if (gutterRef.current) gutterRef.current.scrollTop = t.scrollTop;
   }
 
   return (
@@ -43,16 +53,21 @@ export function Editor({ value, onChange, language }: Props) {
           </div>
         ))}
       </div>
-      <textarea
-        ref={taRef}
-        className="editor-area"
-        spellCheck={false}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={onKeyDown}
-        onScroll={onScroll}
-        data-testid="code-editor"
-      />
+      <div className="editor-code">
+        <pre className="editor-highlight" ref={preRef} aria-hidden="true">
+          <code dangerouslySetInnerHTML={{ __html: html }} />
+        </pre>
+        <textarea
+          ref={taRef}
+          className="editor-area"
+          spellCheck={false}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={onKeyDown}
+          onScroll={onScroll}
+          data-testid="code-editor"
+        />
+      </div>
     </div>
   );
 }
