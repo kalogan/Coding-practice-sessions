@@ -16,6 +16,9 @@ export function App() {
         </h1>
         <p className="tagline">Watch real algorithms run, step by step.</p>
         <AlgoPicker algorithms={algorithms} selectedId={algo.id} onSelect={setSelectedId} />
+        <a className="preview-link" href="/playground">
+          ✎ Write &amp; run your own →
+        </a>
         <a className="preview-link" href="/preview">
           Open the preview workbench →
         </a>

@@ -40,6 +40,7 @@ const server = http.createServer(async (req, res) => {
   let path = decodeURIComponent((req.url ?? '/').split('?')[0]);
   if (path === '/' || path === '') path = '/index.html';
   if (path === '/preview') path = '/preview.html';
+  if (path === '/playground') path = '/playground.html';
   const file = normalize(join(DIST, path));
   if (!file.startsWith(DIST)) {
     res.writeHead(403).end();
@@ -148,10 +149,47 @@ async function checkMobile(path, width = 390) {
   await page.close();
 }
 
+// Playground (JS path): type nothing, just hit Run on the starter and confirm
+// the user's REAL code executes in the worker and its trace renders in the
+// Player — end to end, no console errors, no run-error panel.
+async function checkPlayground(path) {
+  const page = await browser.newPage();
+  const errors = [];
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    const url = m.location()?.url ?? '';
+    if (url.includes('favicon')) return;
+    errors.push(m.text() + (url ? ` [${url}]` : ''));
+  });
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-testid="code-editor"]', { timeout: 5000 }).catch(() => {});
+  await page.locator('[data-testid="run"]').click();
+  const rendered1 = await page
+    .waitForSelector('[data-testid="step-view"]', { timeout: 6000 })
+    .then(() => true)
+    .catch(() => false);
+  await page.waitForTimeout(200);
+  const rendered = await page.locator('[data-testid="step-view"] *').count();
+  const note = (await page.locator('[data-testid="step-note"]').first().textContent()) ?? '';
+  const runErrors = await page.locator('[data-testid="run-error"]').count();
+  await page.screenshot({ path: join(process.cwd(), 'scratchpad-smoke-playground.png'), fullPage: true }).catch(() => {});
+
+  const ok = errors.length === 0 && rendered1 && rendered > 0 && note.length > 0 && runErrors === 0;
+  console.log(
+    `[${ok ? 'PASS' : 'FAIL'}] playground JS (${path})  rendered=${rendered} runError=${runErrors} consoleErrors=${errors.length}`,
+  );
+  if (errors.length) console.log('   console:', errors.join(' | '));
+  if (runErrors) console.log('   runError:', await page.locator('[data-testid="run-error"]').textContent());
+  if (!ok) failed = true;
+  await page.close();
+}
+
 await check('production', '/', 'AlgoHarness');
 await check('preview', '/preview', 'PREVIEW');
 await checkMobile('/', 390);
 await checkMobile('/preview', 360);
+await checkPlayground('/playground');
 
 await browser.close();
 server.close();

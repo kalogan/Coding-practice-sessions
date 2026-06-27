@@ -1,0 +1,145 @@
+/* Playground-only styling. Loaded only by the playground entry. */
+
+.lang-toggle {
+  display: flex;
+  gap: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+}
+.lang-toggle button {
+  flex: 1;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lang-toggle button.active {
+  background: var(--accent);
+  color: #06101f;
+  font-weight: 700;
+}
+
+.pg-io {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 14px;
+  margin: 22px 0 14px;
+}
+
+/* editor */
+.editor {
+  display: flex;
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  height: 420px;
+}
+.editor-gutter {
+  flex: 0 0 auto;
+  padding: 12px 8px 12px 12px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+}
+.editor-gutter .ln {
+  height: calc(13px * 1.5);
+}
+.editor-area {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  resize: none;
+  padding: 12px 14px;
+  background: transparent;
+  color: #c9d1d9;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 2;
+  outline: none;
+  white-space: pre;
+  overflow: auto;
+}
+
+/* input column */
+.pg-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.pg-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.pg-input-area {
+  flex: 1;
+  min-height: 200px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--panel);
+  color: #c9d1d9;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.pg-input-area:focus,
+.editor-area:focus {
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.pg-run {
+  width: 100%;
+  padding: 11px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.pg-run:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.pg-error {
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid #f85149;
+  color: #ffb4ae;
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  margin-bottom: 18px;
+}
+
+.player-empty {
+  color: var(--muted);
+  padding: 28px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 720px) {
+  .pg-io {
+    grid-template-columns: 1fr;
+  }
+  .editor {
+    height: 320px;
+  }
+}

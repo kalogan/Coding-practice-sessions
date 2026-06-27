@@ -4,6 +4,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/preview", "destination": "/preview.html" }
+    { "source": "/preview", "destination": "/preview.html" },
+    { "source": "/playground", "destination": "/playground.html" }
   ]
 }
