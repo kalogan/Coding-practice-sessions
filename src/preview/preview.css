@@ -1,0 +1,65 @@
+/* Inspection-only styling. Loaded ONLY by the preview entry — never ships in
+   the production bundle. */
+
+.knobs {
+  background: var(--panel);
+  border: 1px solid var(--hot);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+.knobs h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--hot);
+}
+.knob {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.knob > span {
+  min-width: 120px;
+  color: var(--muted);
+}
+.knob input[type='text'] {
+  flex: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.knob input[type='range'] {
+  flex: 1;
+  accent-color: var(--hot);
+}
+
+.raw-trace {
+  margin-top: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 18px 12px;
+}
+.raw-trace summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 0;
+}
+.raw-trace pre {
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  color: #9fb0c3;
+}
