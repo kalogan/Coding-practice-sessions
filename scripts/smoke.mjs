@@ -110,8 +110,48 @@ async function check(name, path, mustContain) {
   await page.close();
 }
 
+// Mobile overflow guard: at phone width, the PAGE must never scroll sideways
+// (the bar chart / code may scroll inside their own box, but the page must not).
+// Checks every algorithm — a wide view that stretches the layout fails here.
+async function checkMobile(path, width = 390) {
+  const page = await browser.newPage({ viewport: { width, height: 780 }, isMobile: true });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('[data-testid="step-view"]', { timeout: 5000 }).catch(() => {});
+
+  const items = page.locator('.picker-item');
+  const count = await items.count();
+  let worstOverflow = 0;
+  let worstAlgo = '';
+  for (let i = 0; i < count; i++) {
+    const title = (await items.nth(i).textContent()) ?? `#${i}`;
+    await items.nth(i).click();
+    await page.waitForTimeout(120);
+    // page-level horizontal overflow = scrollWidth beyond the viewport
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    if (overflow > worstOverflow) {
+      worstOverflow = overflow;
+      worstAlgo = title.trim();
+    }
+  }
+  await page.screenshot({ path: join(process.cwd(), 'scratchpad-smoke-mobile.png') }).catch(() => {});
+
+  // allow 1px for sub-pixel rounding
+  const ok = errors.length === 0 && worstOverflow <= 1;
+  console.log(
+    `[${ok ? 'PASS' : 'FAIL'}] mobile ${width}px (${path})  algos=${count} maxHorizOverflow=${worstOverflow}px${worstOverflow > 1 ? ` (worst: ${worstAlgo})` : ''}`,
+  );
+  if (!ok) failed = true;
+  await page.close();
+}
+
 await check('production', '/', 'AlgoHarness');
 await check('preview', '/preview', 'PREVIEW');
+await checkMobile('/', 390);
+await checkMobile('/preview', 360);
 
 await browser.close();
 server.close();

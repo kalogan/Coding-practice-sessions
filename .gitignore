@@ -7,3 +7,4 @@ dist/
 .env.*
 scratchpad/
 scratchpad-smoke-*.png
+scratchpad-*
