@@ -379,6 +379,69 @@ body {
   transform: scale(0.85);
 }
 
+/* ---------- graph view ---------- */
+.graph-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 240px;
+}
+.graph-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  display: block;
+}
+.graph-edge {
+  stroke: var(--line);
+  stroke-width: 3;
+  transition: stroke 0.15s, stroke-width 0.15s;
+}
+.graph-edge.role-active {
+  stroke: var(--accent);
+  stroke-width: 5;
+}
+.graph-edge.role-match {
+  stroke: var(--accent-2);
+  stroke-width: 5;
+}
+.graph-arrow {
+  fill: var(--muted);
+}
+.graph-node circle {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 3;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.graph-node text {
+  fill: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.graph-node.role-active circle {
+  fill: #2f4a73;
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.graph-node.role-frontier circle {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.graph-node.role-visited circle,
+.graph-node.role-done circle {
+  fill: #20392a;
+  stroke: var(--accent-2);
+}
+.graph-node.role-match circle {
+  fill: #3a2f12;
+  stroke: var(--hot);
+  stroke-width: 4;
+}
+
 /* ---------- controls ---------- */
 .controls {
   display: flex;

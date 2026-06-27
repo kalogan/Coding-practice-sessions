@@ -44,13 +44,31 @@ export interface Cell {
   role?: 'plain' | 'match' | 'active' | 'cleared';
 }
 
+/** a node in a graph view; x/y are normalized 0..1 positions the algorithm picks */
+export interface GraphNode {
+  id: string;
+  label?: string;
+  x: number;
+  y: number;
+  role?: 'plain' | 'active' | 'frontier' | 'visited' | 'match' | 'done';
+}
+
+/** an edge in a graph view */
+export interface GraphEdge {
+  from: string;
+  to: string;
+  directed?: boolean;
+  role?: 'plain' | 'active' | 'match';
+}
+
 // Each step renders exactly one of these. Add a new kind here + a renderer in
 // src/harness/views, and every algorithm targeting it lights up for free.
 export type ViewState =
   | { kind: 'array'; values: number[]; markers: Marker[]; window?: { start: number; end: number } }
   | { kind: 'tokens'; tokens: Token[]; window?: { start: number; end: number } }
   | { kind: 'stack'; frames: Frame[] }
-  | { kind: 'grid'; rows: Cell[][] };
+  | { kind: 'grid'; rows: Cell[][] }
+  | { kind: 'graph'; nodes: GraphNode[]; edges: GraphEdge[] };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */
