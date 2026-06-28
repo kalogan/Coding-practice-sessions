@@ -705,6 +705,88 @@ body {
   color: #c9d1d9;
 }
 
+/* ---------- grid policy arrows + gridworld roles ---------- */
+.grid-cell.has-arrow {
+  flex-direction: column;
+  gap: 0;
+  font-size: 13px;
+}
+.grid-cell-value {
+  line-height: 1.1;
+}
+.grid-cell-arrow {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--accent);
+}
+.grid-cell.role-goal {
+  border-color: var(--accent-2);
+  background: #20392a;
+}
+.grid-cell.role-hazard {
+  border-color: #f85149;
+  background: #3a1d1b;
+}
+.grid-cell.role-wall {
+  background: #2a3140;
+  color: var(--muted);
+}
+
+/* ---------- chart / plot view ---------- */
+.chart-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 240px;
+}
+.chart-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  display: block;
+}
+.chart-axis {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.chart-tick,
+.chart-label {
+  fill: var(--muted);
+  font-size: 15px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.chart-label {
+  fill: var(--text);
+  font-size: 16px;
+}
+.chart-line {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+.chart-line.role-active {
+  stroke: var(--accent-2);
+}
+.chart-point circle {
+  fill: var(--panel-2);
+  stroke: var(--muted);
+  stroke-width: 2;
+}
+.chart-point.role-active circle {
+  fill: var(--hot);
+  stroke: var(--hot);
+}
+.chart-point.role-match circle {
+  fill: var(--accent-2);
+  stroke: var(--accent-2);
+}
+.chart-point-label {
+  fill: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
 /* ---------- difficulty pills / tabs / search ---------- */
 .pill.diff-easy {
   background: rgba(126, 231, 135, 0.16);

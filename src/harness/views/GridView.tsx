@@ -23,8 +23,9 @@ export function GridView({ view }: { view: GridState }) {
         <div key={r} className="grid-row">
           {rowHeaders && <div className="grid-head">{rowHeaders[r]}</div>}
           {row.map((c, col) => (
-            <div key={col} className={`grid-cell role-${c.role ?? 'plain'}`}>
-              {c.value}
+            <div key={col} className={`grid-cell role-${c.role ?? 'plain'}${c.arrow ? ' has-arrow' : ''}`}>
+              <span className="grid-cell-value">{c.value}</span>
+              {c.arrow && <span className="grid-cell-arrow">{c.arrow}</span>}
             </div>
           ))}
         </div>

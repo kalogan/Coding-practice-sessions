@@ -8,6 +8,7 @@ import { LinkedListView } from './views/LinkedListView';
 import { HashTableView } from './views/HashTableView';
 import { SegTreeView } from './views/SegTreeView';
 import { HeapArrayView } from './views/HeapArrayView';
+import { ChartView } from './views/ChartView';
 
 // Dispatches a step to the right renderer by its view kind. The player
 // (controls/scrub/state/notes) is identical across every algorithm — only the
@@ -25,6 +26,7 @@ export function StepView({ step }: { step: TraceStep }) {
       {v.kind === 'hashtable' && <HashTableView view={v} />}
       {v.kind === 'segtree' && <SegTreeView view={v} />}
       {v.kind === 'heaparray' && <HeapArrayView view={v} />}
+      {v.kind === 'chart' && <ChartView view={v} />}
     </div>
   );
 }

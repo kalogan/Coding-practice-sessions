@@ -98,7 +98,23 @@ export interface Frame {
 /** one cell in a grid view */
 export interface Cell {
   value: string | number;
-  role?: 'plain' | 'match' | 'active' | 'cleared' | 'dep' | 'done';
+  role?: 'plain' | 'match' | 'active' | 'cleared' | 'dep' | 'done' | 'goal' | 'hazard' | 'wall';
+  /** optional glyph drawn under the value (e.g. a policy arrow ↑ ↓ ← →) */
+  arrow?: string;
+}
+
+/** a polyline series in a chart view, as [x, y] data points */
+export interface ChartLine {
+  points: Array<[number, number]>;
+  role?: 'plain' | 'active';
+}
+
+/** a highlighted point in a chart view (e.g. the current position of descent) */
+export interface ChartPoint {
+  x: number;
+  y: number;
+  role?: 'plain' | 'active' | 'match';
+  label?: string;
 }
 
 /** a node in a graph view; x/y are normalized 0..1 positions the algorithm picks */
@@ -138,7 +154,16 @@ export type ViewState =
   | { kind: 'list'; nodes: ListNode[]; pointers?: ListPointer[] }
   | { kind: 'hashtable'; buckets: HashBucket[] }
   | { kind: 'segtree'; nodes: SegNode[]; edges: SegEdge[] }
-  | { kind: 'heaparray'; cells: HeapCell[]; links?: Array<{ parent: number; child: number }> };
+  | { kind: 'heaparray'; cells: HeapCell[]; links?: Array<{ parent: number; child: number }> }
+  | {
+      kind: 'chart';
+      lines: ChartLine[];
+      points: ChartPoint[];
+      xRange: [number, number];
+      yRange: [number, number];
+      xLabel?: string;
+      yLabel?: string;
+    };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */
