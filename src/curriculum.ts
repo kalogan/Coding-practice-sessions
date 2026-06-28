@@ -104,4 +104,25 @@ export const CURRICULUM: CurriculumModule[] = [
     blurb: 'The capstone: neural networks as the brain. DQN learns Q from features; PPO is the clipped policy gradient that trains real game bots.',
     algoIds: ['dqn', 'ppo'],
   },
+
+  // ── Applied mini-track: the end-to-end pipeline for training a game bot
+  //    from real gameplay data, by imitation learning. ──
+  {
+    id: 'pipeline-data',
+    title: 'Bot Pipeline · Data Engineering',
+    blurb: 'The applied track. It starts with real gameplay: capture client→server snapshots, store them in a clean relational schema, and query them with a join + aggregate.',
+    algoIds: ['data-capture', 'relational-schema', 'sql-query'],
+  },
+  {
+    id: 'pipeline-preprocess',
+    title: 'Bot Pipeline · Preprocess & Tensors',
+    blurb: 'Turn messy logs into model food: forward-fill gaps, resample in time, cap & pad to a fixed length, then stack the samples into the input tensor.',
+    algoIds: ['preprocess-sequence', 'build-tensor'],
+  },
+  {
+    id: 'pipeline-train-serve',
+    title: 'Bot Pipeline · Imitation Learning & Serving',
+    blurb: 'Train a model to copy the expert (behavioral cloning), serve it as a live bot (state → action), and x-ray the input tensor to catch data bugs before you commit.',
+    algoIds: ['imitation-learning', 'serve-bot', 'tensor-xray'],
+  },
 ];
