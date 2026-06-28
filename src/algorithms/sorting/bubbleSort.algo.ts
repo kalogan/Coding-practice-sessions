@@ -1,0 +1,145 @@
+import type { AlgoDescriptor, AlgoInput, AlgoResult, BarRole } from '../types';
+import { Tracer } from '../tracer';
+
+// Bubble sort.
+// Scenario: repeatedly compare adjacent elements and swap them when out of
+// order. On every pass the largest remaining value "bubbles" up to the end, so
+// the sorted tail grows by one each pass until the whole array is ordered.
+
+function run(input: AlgoInput): AlgoResult {
+  const values = (input.array ?? []).slice(); // copy: we reorder this in place
+  const n = values.length;
+  const t = new Tracer();
+  let comparisons = 0;
+  let swaps = 0;
+
+  // `sortedFrom` is the first index of the settled tail (everything >= it is sorted).
+  let sortedFrom = n;
+
+  // Build a fresh per-bar colour array for a step. The settled tail is 'sorted';
+  // everything else is 'plain' unless the caller highlights specific indices.
+  const paint = (highlight: Record<number, BarRole> = {}): BarRole[] =>
+    values.map((_, i) => {
+      if (highlight[i]) return highlight[i];
+      return i >= sortedFrom ? 'sorted' : 'plain';
+    });
+
+  for (let pass = 0; pass < n - 1; pass++) {
+    let swappedThisPass = false;
+
+    for (let i = 0; i < sortedFrom - 1; i++) {
+      comparisons++;
+      // Show the two adjacent bars we are comparing.
+      t.step({
+        view: {
+          kind: 'array',
+          values: values.slice(),
+          markers: [],
+          bars: paint({ [i]: 'compare', [i + 1]: 'compare' }),
+        },
+        state: [
+          { label: 'pass', value: pass + 1 },
+          { label: 'comparisons', value: comparisons, highlight: true },
+          { label: 'swaps', value: swaps },
+        ],
+        note: `Compare bars ${i} (${values[i]}) and ${i + 1} (${values[i + 1]}).`,
+      });
+
+      if (values[i] > values[i + 1]) {
+        // Out of order: swap the REAL values, then show them recoloured 'swap'.
+        const tmp = values[i];
+        values[i] = values[i + 1];
+        values[i + 1] = tmp;
+        swaps++;
+        swappedThisPass = true;
+
+        t.step({
+          view: {
+            kind: 'array',
+            values: values.slice(),
+            markers: [],
+            bars: paint({ [i]: 'swap', [i + 1]: 'swap' }),
+          },
+          state: [
+            { label: 'pass', value: pass + 1 },
+            { label: 'comparisons', value: comparisons },
+            { label: 'swaps', value: swaps, highlight: true },
+          ],
+          note: `${values[i + 1]} > ${values[i]}, so swap them. Now ${values[i]} sits before ${values[i + 1]}.`,
+        });
+      }
+    }
+
+    // The largest unsorted element has bubbled to position sortedFrom-1: settle it.
+    sortedFrom--;
+    t.step({
+      view: {
+        kind: 'array',
+        values: values.slice(),
+        markers: [],
+        bars: paint(),
+      },
+      state: [
+        { label: 'pass', value: pass + 1 },
+        { label: 'comparisons', value: comparisons },
+        { label: 'swaps', value: swaps },
+      ],
+      note: `End of pass ${pass + 1}: ${values[sortedFrom]} is the largest unsorted value and is now settled at index ${sortedFrom}.`,
+    });
+
+    // Optimisation: if a pass made no swaps the array is already sorted.
+    if (!swappedThisPass) {
+      sortedFrom = 0; // everything is settled
+      break;
+    }
+  }
+
+  // Whatever remains at index 0 is also in place once the loop ends.
+  sortedFrom = 0;
+  t.step({
+    view: {
+      kind: 'array',
+      values: values.slice(),
+      markers: [],
+      bars: values.map(() => 'sorted' as BarRole),
+    },
+    state: [
+      { label: 'comparisons', value: comparisons },
+      { label: 'swaps', value: swaps },
+      { label: 'answer', value: values.join(' '), highlight: true },
+    ],
+    note: `Sorted. ${comparisons} comparisons and ${swaps} swaps total.`,
+  });
+
+  return { steps: t.steps, answer: values.join(' ') };
+}
+
+const descriptor: AlgoDescriptor = {
+  id: 'bubble-sort',
+  title: 'Bubble sort',
+  category: 'Sorting',
+  scenario:
+    'Repeatedly walk the list comparing each pair of adjacent items and swapping any that are out of order. Each full pass floats the largest remaining value up to the end, so the sorted tail grows by one until nothing is left to move.',
+  pattern:
+    'Adjacent-swap sort with a shrinking boundary: after pass p the last p elements are final, so each pass scans one fewer element. A pass with zero swaps means the array is already sorted — stop early.',
+  complexity: 'O(n²) time · O(1) space',
+  defaultInput: { array: [5, 2, 8, 1, 4] },
+  expected: '1 2 4 5 8',
+  run,
+  code: `function bubbleSort(values) {
+  const a = values.slice();
+  for (let pass = 0; pass < a.length - 1; pass++) {
+    let swapped = false;
+    for (let i = 0; i < a.length - 1 - pass; i++) {
+      if (a[i] > a[i + 1]) {            // out of order?
+        [a[i], a[i + 1]] = [a[i + 1], a[i]]; // swap
+        swapped = true;
+      }
+    }
+    if (!swapped) break;               // already sorted
+  }
+  return a.join(' ');
+}`,
+};
+
+export default descriptor;
