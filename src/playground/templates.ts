@@ -24,6 +24,7 @@ export const JS_TEMPLATE = `// Write a run(input, trace) function.
 //   { kind: 'heaparray', cells: [{index, value, role}], links: [{parent, child}] }
 //   { kind: 'chart',  lines: [{points: [[x,y]...], role}], points: [{x, y, role, label}], xRange:[a,b], yRange:[a,b], xLabel, yLabel }
 //   { kind: 'network', neurons: [{id, x, y, value, label, role}], edges: [{from, to, weight, role}] }
+//   { kind: 'conv',    input: [[n]], kernel: [[n]], output: [[n|null]], window: {row,col}, active: {row,col} }
 
 function run(input, trace) {
   const a = input.array;

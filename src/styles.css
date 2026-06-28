@@ -787,6 +787,76 @@ body {
   font-weight: 600;
 }
 
+/* ---------- conv (convnet) view ---------- */
+.conv-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 30px 0 18px;
+  padding: 20px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 240px;
+}
+.conv-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.conv-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.conv-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.conv-row {
+  display: flex;
+  gap: 4px;
+}
+.conv-cell {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.15s, border-color 0.15s;
+}
+.conv-cell.in-window {
+  border-color: var(--accent);
+  background: #2f4a73;
+}
+.conv-cell.kernel {
+  background: rgba(126, 231, 135, 0.12);
+  border-color: var(--accent-2);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.conv-cell.out.active {
+  border-color: var(--hot);
+  background: #5a3a1e;
+}
+.conv-cell.out.empty {
+  background: transparent;
+  border-style: dashed;
+}
+.conv-op {
+  font-size: 22px;
+  color: var(--muted);
+}
+
 /* ---------- neural network view ---------- */
 .network-view {
   margin: 30px 0 18px;

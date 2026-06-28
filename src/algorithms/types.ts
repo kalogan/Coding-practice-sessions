@@ -183,7 +183,20 @@ export type ViewState =
       xLabel?: string;
       yLabel?: string;
     }
-  | { kind: 'network'; neurons: NetNeuron[]; edges: NetEdge[] };
+  | { kind: 'network'; neurons: NetNeuron[]; edges: NetEdge[] }
+  | {
+      kind: 'conv';
+      /** the input "image" (game board) */
+      input: number[][];
+      /** the convolution kernel (filter) */
+      kernel: number[][];
+      /** the output feature map; null = not computed yet */
+      output: Array<Array<number | null>>;
+      /** top-left of the kernel window currently sitting on the input */
+      window?: { row: number; col: number };
+      /** the output cell currently being computed */
+      active?: { row: number; col: number };
+    };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */
