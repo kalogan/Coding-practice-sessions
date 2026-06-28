@@ -787,6 +787,67 @@ body {
   font-weight: 600;
 }
 
+/* ---------- neural network view ---------- */
+.network-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 260px;
+}
+.network-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 460px;
+  display: block;
+}
+.net-edge {
+  stroke: var(--line);
+  stroke-width: 2;
+  transition: stroke 0.15s, stroke-width 0.15s;
+}
+.net-edge.role-active {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+.net-edge.role-grad {
+  stroke: var(--hot);
+  stroke-width: 3.5;
+  stroke-dasharray: 5 4;
+}
+.net-weight {
+  fill: var(--muted);
+  font-size: 13px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.net-neuron circle {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.net-neuron.role-active circle {
+  fill: #2f4a73;
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+.net-neuron.role-grad circle {
+  fill: #5a3a1e;
+  stroke: var(--hot);
+  stroke-width: 3.5;
+}
+.net-value {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.net-label {
+  fill: var(--muted);
+  font-size: 14px;
+}
+
 /* ---------- difficulty pills / tabs / search ---------- */
 .pill.diff-easy {
   background: rgba(126, 231, 135, 0.16);

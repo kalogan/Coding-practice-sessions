@@ -103,6 +103,25 @@ export interface Cell {
   arrow?: string;
 }
 
+/** a neuron in a neural-network view; x/y are normalized 0..1 positions */
+export interface NetNeuron {
+  id: string;
+  x: number;
+  y: number;
+  /** activation value shown inside the node */
+  value?: number;
+  label?: string;
+  role?: 'plain' | 'active' | 'grad';
+}
+
+/** a weighted connection in a neural-network view */
+export interface NetEdge {
+  from: string;
+  to: string;
+  weight?: number;
+  role?: 'plain' | 'active' | 'grad';
+}
+
 /** a polyline series in a chart view, as [x, y] data points */
 export interface ChartLine {
   points: Array<[number, number]>;
@@ -163,7 +182,8 @@ export type ViewState =
       yRange: [number, number];
       xLabel?: string;
       yLabel?: string;
-    };
+    }
+  | { kind: 'network'; neurons: NetNeuron[]; edges: NetEdge[] };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */
