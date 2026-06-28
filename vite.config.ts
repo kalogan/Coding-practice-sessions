@@ -14,6 +14,7 @@ export default defineConfig({
         main: 'index.html',
         preview: 'preview.html',
         playground: 'playground.html',
+        learn: 'learn.html',
       },
     },
   },

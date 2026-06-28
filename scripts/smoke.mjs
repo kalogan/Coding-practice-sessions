@@ -41,6 +41,7 @@ const server = http.createServer(async (req, res) => {
   if (path === '/' || path === '') path = '/index.html';
   if (path === '/preview') path = '/preview.html';
   if (path === '/playground') path = '/playground.html';
+  if (path === '/learn') path = '/learn.html';
   const file = normalize(join(DIST, path));
   if (!file.startsWith(DIST)) {
     res.writeHead(403).end();
@@ -191,11 +192,42 @@ async function checkPlayground(path) {
   await page.close();
 }
 
+// Study path (/learn): the curriculum renders modules and deep-links work.
+async function checkLearn() {
+  const page = await browser.newPage();
+  const errors = [];
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    const url = m.location()?.url ?? '';
+    if (url.includes('favicon')) return;
+    errors.push(m.text());
+  });
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto(`${base}/learn`, { waitUntil: 'networkidle' });
+  const modules = await page.locator('.module').count();
+  const links = await page.locator('.learn-link').count();
+  const ok = errors.length === 0 && modules >= 10 && links >= 40;
+  console.log(`[${ok ? 'PASS' : 'FAIL'}] study path (/learn)  modules=${modules} links=${links} consoleErrors=${errors.length}`);
+  if (errors.length) console.log('   console:', errors.join(' | '));
+  if (!ok) failed = true;
+  await page.close();
+
+  // deep-link: /?algo=dqn selects DQN
+  const p2 = await browser.newPage();
+  await p2.goto(`${base}/?algo=dqn`, { waitUntil: 'networkidle' });
+  const heading = (await p2.locator('.algo-header h2').first().textContent()) ?? '';
+  const deepOk = heading.toLowerCase().includes('dqn');
+  console.log(`[${deepOk ? 'PASS' : 'FAIL'}] deep-link (/?algo=dqn)  heading="${heading}"`);
+  if (!deepOk) failed = true;
+  await p2.close();
+}
+
 await check('production', '/', 'AlgoHarness');
 await check('preview', '/preview', 'PREVIEW');
 await checkMobile('/', 390);
 await checkMobile('/preview', 360);
 await checkPlayground('/playground');
+await checkLearn();
 
 await browser.close();
 server.close();

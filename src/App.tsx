@@ -4,9 +4,20 @@ import { AlgoPicker } from './harness/AlgoPicker';
 import { Workbench } from './core/Workbench';
 import { AppShell } from './core/AppShell';
 
+// allow deep-links from the study path: /?algo=<id>
+function initialAlgoId(): string {
+  try {
+    const q = new URLSearchParams(window.location.search).get('algo');
+    if (q && getAlgorithm(q)) return q;
+  } catch {
+    /* no-op */
+  }
+  return algorithms[0]?.id ?? '';
+}
+
 // Production entry (served at /). Clean, opinionated learning view.
 export function App() {
-  const [selectedId, setSelectedId] = useState(algorithms[0]?.id ?? '');
+  const [selectedId, setSelectedId] = useState(initialAlgoId);
   const algo = getAlgorithm(selectedId) ?? algorithms[0];
 
   return (
@@ -25,6 +36,9 @@ export function App() {
               close();
             }}
           />
+          <a className="preview-link" href="/learn">
+            🎓 Study path →
+          </a>
           <a className="preview-link" href="/playground">
             ✎ Write &amp; run your own →
           </a>
