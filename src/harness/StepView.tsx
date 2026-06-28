@@ -11,6 +11,7 @@ import { HeapArrayView } from './views/HeapArrayView';
 import { ChartView } from './views/ChartView';
 import { NetworkView } from './views/NetworkView';
 import { ConvView } from './views/ConvView';
+import { TableView } from './views/TableView';
 
 // Dispatches a step to the right renderer by its view kind. The player
 // (controls/scrub/state/notes) is identical across every algorithm — only the
@@ -31,6 +32,7 @@ export function StepView({ step }: { step: TraceStep }) {
       {v.kind === 'chart' && <ChartView view={v} />}
       {v.kind === 'network' && <NetworkView view={v} />}
       {v.kind === 'conv' && <ConvView view={v} />}
+      {v.kind === 'table' && <TableView view={v} />}
     </div>
   );
 }

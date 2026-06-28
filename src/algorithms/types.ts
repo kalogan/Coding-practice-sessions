@@ -122,6 +122,22 @@ export interface NetEdge {
   role?: 'plain' | 'active' | 'grad';
 }
 
+/** a labelled table — relational data, query results, or a tensor (with heat) */
+export interface DataTable {
+  name?: string;
+  columns: string[];
+  rows: Array<Array<string | number>>;
+  caption?: string;
+  /** colour cells by numeric value (tensor / x-ray heatmap) */
+  heat?: boolean;
+  heatMin?: number;
+  heatMax?: number;
+  highlightRow?: number;
+  highlightCol?: number;
+  /** cells to flag as anomalies (NaN / out-of-range), drawn with a red border */
+  flags?: Array<{ row: number; col: number }>;
+}
+
 /** a polyline series in a chart view, as [x, y] data points */
 export interface ChartLine {
   points: Array<[number, number]>;
@@ -184,6 +200,7 @@ export type ViewState =
       yLabel?: string;
     }
   | { kind: 'network'; neurons: NetNeuron[]; edges: NetEdge[] }
+  | { kind: 'table'; tables: DataTable[] }
   | {
       kind: 'conv';
       /** the input "image" (game board) */
