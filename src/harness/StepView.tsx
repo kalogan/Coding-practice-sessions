@@ -5,6 +5,9 @@ import { StackView } from './views/StackView';
 import { GridView } from './views/GridView';
 import { GraphView } from './views/GraphView';
 import { LinkedListView } from './views/LinkedListView';
+import { HashTableView } from './views/HashTableView';
+import { SegTreeView } from './views/SegTreeView';
+import { HeapArrayView } from './views/HeapArrayView';
 
 // Dispatches a step to the right renderer by its view kind. The player
 // (controls/scrub/state/notes) is identical across every algorithm — only the
@@ -19,6 +22,9 @@ export function StepView({ step }: { step: TraceStep }) {
       {v.kind === 'grid' && <GridView view={v} />}
       {v.kind === 'graph' && <GraphView view={v} />}
       {v.kind === 'list' && <LinkedListView view={v} />}
+      {v.kind === 'hashtable' && <HashTableView view={v} />}
+      {v.kind === 'segtree' && <SegTreeView view={v} />}
+      {v.kind === 'heaparray' && <HeapArrayView view={v} />}
     </div>
   );
 }

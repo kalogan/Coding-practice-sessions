@@ -17,8 +17,11 @@ export const JS_TEMPLATE = `// Write a run(input, trace) function.
 //   { kind: 'tokens', tokens: [{text, role, label}], window: {start,end} }
 //   { kind: 'stack',  frames: [{title, detail, status:'active'|'returning'|'done'}] }
 //   { kind: 'grid',   rows: [[{value, role}]], colHeaders: [...], rowHeaders: [...] }
-//   { kind: 'graph',  nodes: [{id, label, x, y, role}], edges: [{from, to, directed, role}] }
-//   { kind: 'list',   nodes: [{id, value, next, role}], pointers: [{label, target, role}] }
+//   { kind: 'graph',  nodes: [{id, label, x, y, role}], edges: [{from, to, directed, role, weight}] }
+//   { kind: 'list',   nodes: [{id, value, next, prev, role}], pointers: [{label, target, role}] }
+//   { kind: 'hashtable', buckets: [{index, entries: [{key, value, role}], role}] }
+//   { kind: 'segtree',   nodes: [{id, lo, hi, value, x, y, role}], edges: [{from, to}] }
+//   { kind: 'heaparray', cells: [{index, value, role}], links: [{parent, child}] }
 
 function run(input, trace) {
   const a = input.array;

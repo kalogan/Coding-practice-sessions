@@ -46,16 +46,27 @@ export function GraphView({ view }: { view: GraphState }) {
             x2 = b.x - (dx / len) * (R + 8);
             y2 = b.y - (dy / len) * (R + 8);
           }
+          const mx = (a.x + b.x) / 2;
+          const my = (a.y + b.y) / 2;
           return (
-            <line
-              key={i}
-              x1={a.x}
-              y1={a.y}
-              x2={x2}
-              y2={y2}
-              className={`graph-edge role-${e.role ?? 'plain'}`}
-              markerEnd={e.directed ? 'url(#graph-arrow)' : undefined}
-            />
+            <g key={i}>
+              <line
+                x1={a.x}
+                y1={a.y}
+                x2={x2}
+                y2={y2}
+                className={`graph-edge role-${e.role ?? 'plain'}`}
+                markerEnd={e.directed ? 'url(#graph-arrow)' : undefined}
+              />
+              {e.weight !== undefined && (
+                <>
+                  <circle cx={mx} cy={my} r={16} className="graph-weight-bg" />
+                  <text x={mx} y={my} className="graph-weight" textAnchor="middle" dominantBaseline="central">
+                    {e.weight}
+                  </text>
+                </>
+              )}
+            </g>
           );
         })}
 

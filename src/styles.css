@@ -705,6 +705,301 @@ body {
   color: #c9d1d9;
 }
 
+/* ---------- difficulty pills / tabs / search ---------- */
+.pill.diff-easy {
+  background: rgba(126, 231, 135, 0.16);
+  color: var(--accent-2);
+}
+.pill.diff-medium {
+  background: rgba(240, 136, 62, 0.16);
+  color: var(--hot);
+}
+.pill.diff-hard {
+  background: rgba(248, 81, 73, 0.18);
+  color: #ff7b72;
+}
+.picker-search {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.diff-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.diff-tab {
+  flex: 1;
+  padding: 5px 4px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.diff-tab.active {
+  background: var(--panel-2);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.picker-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.diff-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.diff-dot.diff-easy {
+  background: var(--accent-2);
+}
+.diff-dot.diff-medium {
+  background: var(--hot);
+}
+.diff-dot.diff-hard {
+  background: #f85149;
+}
+
+/* ---------- ELI5 breakdown ---------- */
+.eli5 {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-top: 18px;
+  padding: 6px 18px 16px;
+}
+.eli5 summary {
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 12px 0;
+}
+.eli5-body {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.eli5-body h4 {
+  margin: 18px 0 8px;
+  font-size: 15px;
+  color: var(--accent-2);
+}
+.eli5-body p {
+  margin: 0 0 12px;
+}
+.eli5-body ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+.eli5-body li {
+  margin-bottom: 6px;
+}
+.eli5-body code {
+  background: var(--panel-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+/* ---------- graph edge weights / list prev ---------- */
+.graph-weight-bg {
+  fill: var(--bg);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+.graph-weight {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.list-prev {
+  stroke: var(--accent-2);
+  stroke-dasharray: 5 4;
+}
+
+/* ---------- hash table view ---------- */
+.hashtable-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 30px 0 18px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 240px;
+}
+.hash-bucket {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.hash-bucket.role-active {
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.08);
+}
+.hash-bucket.role-match {
+  border-color: var(--accent-2);
+}
+.hash-index {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+}
+.hash-chain {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hash-empty {
+  color: var(--muted);
+}
+.hash-entry {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+.hash-entry small {
+  color: var(--muted);
+}
+.hash-entry.role-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.hash-entry.role-match {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+.hash-entry.role-probe {
+  border-color: var(--hot);
+  color: var(--hot);
+}
+
+/* ---------- segment tree view ---------- */
+.segtree-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 260px;
+}
+.segtree-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 460px;
+  display: block;
+}
+.seg-edge {
+  stroke: var(--line);
+  stroke-width: 2.5;
+}
+.seg-node rect {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.seg-range {
+  fill: var(--muted);
+  font-size: 13px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.seg-value {
+  fill: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+}
+.seg-node.role-active rect {
+  fill: #2f4a73;
+  stroke: var(--accent);
+}
+.seg-node.role-match rect {
+  fill: #20392a;
+  stroke: var(--accent-2);
+}
+.seg-node.role-partial rect {
+  stroke: var(--hot);
+}
+
+/* ---------- heap-as-array view ---------- */
+.heaparray-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 200px;
+}
+.heaparray-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  display: block;
+}
+.heap-link {
+  stroke: var(--muted);
+  stroke-width: 2.5;
+}
+.heap-cell rect {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 2.5;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.heap-val {
+  fill: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+}
+.heap-idx {
+  fill: var(--muted);
+  font-size: 13px;
+}
+.heap-cell.role-active rect {
+  fill: #2f4a73;
+  stroke: var(--accent);
+}
+.heap-cell.role-compare rect {
+  stroke: var(--accent);
+}
+.heap-cell.role-swap rect {
+  fill: #5a3a1e;
+  stroke: var(--hot);
+}
+
 @media (max-width: 720px) {
   .app {
     display: block;

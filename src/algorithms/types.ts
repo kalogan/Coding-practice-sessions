@@ -31,7 +31,46 @@ export interface ListNode {
   id: string;
   value: string | number;
   next: string | null;
+  /** previous-pointer id for doubly linked lists (drawn as a back-arrow) */
+  prev?: string | null;
   role?: 'plain' | 'active' | 'visited' | 'match';
+}
+
+/** one entry in a hash bucket */
+export interface HashEntry {
+  key: string;
+  value?: string | number;
+  role?: 'plain' | 'active' | 'match' | 'probe';
+}
+
+/** one bucket (slot) of a hash table */
+export interface HashBucket {
+  index: number;
+  entries: HashEntry[];
+  role?: 'plain' | 'active' | 'match';
+}
+
+/** a node of a segment tree; covers the range [lo, hi] and holds an aggregate */
+export interface SegNode {
+  id: string;
+  lo: number;
+  hi: number;
+  value: string | number;
+  x: number;
+  y: number;
+  role?: 'plain' | 'active' | 'match' | 'partial';
+}
+
+export interface SegEdge {
+  from: string;
+  to: string;
+}
+
+/** one cell of a heap rendered as its backing array */
+export interface HeapCell {
+  index: number;
+  value: number;
+  role?: 'plain' | 'active' | 'compare' | 'swap';
 }
 
 /** a labelled cursor drawn above a list node (head / prev / cur / slow / fast) */
@@ -77,6 +116,8 @@ export interface GraphEdge {
   to: string;
   directed?: boolean;
   role?: 'plain' | 'active' | 'match';
+  /** edge weight, drawn as a label at the midpoint (weighted graphs) */
+  weight?: number;
 }
 
 // Each step renders exactly one of these. Add a new kind here + a renderer in
@@ -94,7 +135,10 @@ export type ViewState =
   | { kind: 'stack'; frames: Frame[] }
   | { kind: 'grid'; rows: Cell[][]; colHeaders?: string[]; rowHeaders?: string[] }
   | { kind: 'graph'; nodes: GraphNode[]; edges: GraphEdge[] }
-  | { kind: 'list'; nodes: ListNode[]; pointers?: ListPointer[] };
+  | { kind: 'list'; nodes: ListNode[]; pointers?: ListPointer[] }
+  | { kind: 'hashtable'; buckets: HashBucket[] }
+  | { kind: 'segtree'; nodes: SegNode[]; edges: SegEdge[] }
+  | { kind: 'heaparray'; cells: HeapCell[]; links?: Array<{ parent: number; child: number }> };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */
@@ -130,6 +174,8 @@ export interface AlgoDescriptor {
   pattern: string;
   /** e.g. "O(n) time · O(1) space" */
   complexity: string;
+  /** rough interview difficulty; defaults to Medium in the UI when omitted */
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
   defaultInput: AlgoInput;
   /** THE REAL CODE: pure function of input; computes answer + emits the trace */
   run: (input: AlgoInput) => AlgoResult;
@@ -137,4 +183,10 @@ export interface AlgoDescriptor {
   expected: string | number;
   /** source shown to the learner (mirrors `run`'s logic, minus the trace calls) */
   code: string;
+  /**
+   * Plain-language "explain like I'm 5" breakdown shown in an expandable section
+   * at the bottom of the page. Markdown-ish: blank lines separate paragraphs,
+   * lines starting with "## " are sub-headings, "- " are bullets.
+   */
+  eli5?: string;
 }

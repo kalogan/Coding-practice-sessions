@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { AlgoDescriptor, AlgoInput } from '../algorithms/types';
 import { Player } from './Player';
+import { Eli5 } from '../harness/Eli5';
 
 interface Props {
   algo: AlgoDescriptor;
@@ -21,6 +22,9 @@ export function Workbench({ algo, input, children }: Props) {
       <header className="algo-header">
         <div className="algo-meta">
           <span className="pill">{algo.category}</span>
+          <span className={`pill diff-${(algo.difficulty ?? 'Medium').toLowerCase()}`}>
+            {algo.difficulty ?? 'Medium'}
+          </span>
           <span className="pill ghost">{algo.complexity}</span>
         </div>
         <h2>{algo.title}</h2>
@@ -33,6 +37,8 @@ export function Workbench({ algo, input, children }: Props) {
       {children}
 
       <Player result={result} code={algo.code} />
+
+      {algo.eli5 && <Eli5 text={algo.eli5} />}
     </div>
   );
 }
