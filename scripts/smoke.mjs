@@ -122,10 +122,16 @@ async function checkMobile(path, width = 390) {
   await page.waitForSelector('[data-testid="step-view"]', { timeout: 5000 }).catch(() => {});
 
   const items = page.locator('.picker-item');
+  const hamburger = page.locator('[data-testid="hamburger"]');
   const count = await items.count();
   let worstOverflow = 0;
   let worstAlgo = '';
   for (let i = 0; i < count; i++) {
+    // the picker lives in a drawer on mobile — open it before selecting
+    if (await hamburger.isVisible()) {
+      await hamburger.click();
+      await page.waitForTimeout(80);
+    }
     const title = (await items.nth(i).textContent()) ?? `#${i}`;
     await items.nth(i).click();
     await page.waitForTimeout(120);

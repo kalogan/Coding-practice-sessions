@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { algorithms, getAlgorithm } from '../algorithms/registry';
 import { AlgoPicker } from '../harness/AlgoPicker';
 import { Workbench } from '../core/Workbench';
+import { AppShell } from '../core/AppShell';
 import type { AlgoInput } from '../algorithms/types';
 
 // Preview entry (served at /preview). Same real Workbench + same registry as
@@ -46,25 +47,34 @@ export function PreviewApp() {
   const sliderMax = Math.max(20, ...(input.array ?? [20]));
 
   return (
-    <div className="app preview-mode">
-      <aside className="sidebar">
-        <h1 className="brand">
-          Algo<span>Harness</span>
-        </h1>
-        <span className="mode-badge">PREVIEW · workbench</span>
-        <p className="tagline">Tweak inputs, inspect the raw trace.</p>
-        <AlgoPicker algorithms={algorithms} selectedId={algo.id} onSelect={setSelectedId} />
-        <a className="preview-link" href="/">
-          ← Back to the learning view
-        </a>
-        <p className="boundary">
-          Boundary: this previews the <strong>real</strong> algorithm + renderer. It does not
-          verify performance at scale or anything the code doesn&apos;t actually execute.
-        </p>
-      </aside>
-
-      <main className="stage">
-        <Workbench key={algo.id + JSON.stringify(input)} algo={algo} input={input}>
+    <AppShell
+      className="preview-mode"
+      sidebar={(close) => (
+        <>
+          <h1 className="brand">
+            Algo<span>Harness</span>
+          </h1>
+          <span className="mode-badge">PREVIEW · workbench</span>
+          <p className="tagline">Tweak inputs, inspect the raw trace.</p>
+          <AlgoPicker
+            algorithms={algorithms}
+            selectedId={algo.id}
+            onSelect={(id) => {
+              setSelectedId(id);
+              close();
+            }}
+          />
+          <a className="preview-link" href="/">
+            ← Back to the learning view
+          </a>
+          <p className="boundary">
+            Boundary: this previews the <strong>real</strong> algorithm + renderer. It does not
+            verify performance at scale or anything the code doesn&apos;t actually execute.
+          </p>
+        </>
+      )}
+    >
+      <Workbench key={algo.id + JSON.stringify(input)} algo={algo} input={input}>
           <div className="knobs" data-testid="knobs">
             <h3>
               Inputs <span className="muted">— same input, same trace (deterministic)</span>
@@ -127,7 +137,6 @@ export function PreviewApp() {
           <summary>Raw trace — {trace.steps.length} emitted snapshots</summary>
           <pre>{JSON.stringify(trace.steps, null, 2)}</pre>
         </details>
-      </main>
-    </div>
+    </AppShell>
   );
 }

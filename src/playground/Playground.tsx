@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Player } from '../core/Player';
+import { AppShell } from '../core/AppShell';
 import { Editor } from './Editor';
 import { runJs } from './runJs';
 import { runPython } from './runPython';
@@ -56,35 +57,48 @@ export function Playground() {
   }
 
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <h1 className="brand">
-          Algo<span>Harness</span>
-        </h1>
-        <span className="mode-badge">PLAYGROUND</span>
-        <p className="tagline">Write your own code. Watch it run.</p>
-        <div className="lang-toggle" data-testid="lang-toggle">
-          <button className={lang === 'js' ? 'active' : ''} onClick={() => switchLang('js')}>
-            JavaScript
-          </button>
-          <button className={lang === 'python' ? 'active' : ''} onClick={() => switchLang('python')}>
-            Python
-          </button>
-        </div>
-        <a className="preview-link" href="/">
-          ← Back to the learning view
-        </a>
-        <p className="boundary">
-          Your <strong>real</strong> code runs{' '}
-          {lang === 'js'
-            ? 'in a sandboxed Web Worker with a timeout'
-            : 'via Pyodide — CPython compiled to WebAssembly, loaded from a CDN on first run (~10MB)'}
-          . The animation IS its execution.
-        </p>
-      </aside>
-
-      <main className="stage">
-        <header className="algo-header">
+    <AppShell
+      sidebar={(close) => (
+        <>
+          <h1 className="brand">
+            Algo<span>Harness</span>
+          </h1>
+          <span className="mode-badge">PLAYGROUND</span>
+          <p className="tagline">Write your own code. Watch it run.</p>
+          <div className="lang-toggle" data-testid="lang-toggle">
+            <button
+              className={lang === 'js' ? 'active' : ''}
+              onClick={() => {
+                switchLang('js');
+                close();
+              }}
+            >
+              JavaScript
+            </button>
+            <button
+              className={lang === 'python' ? 'active' : ''}
+              onClick={() => {
+                switchLang('python');
+                close();
+              }}
+            >
+              Python
+            </button>
+          </div>
+          <a className="preview-link" href="/">
+            ← Back to the learning view
+          </a>
+          <p className="boundary">
+            Your <strong>real</strong> code runs{' '}
+            {lang === 'js'
+              ? 'in a sandboxed Web Worker with a timeout'
+              : 'via Pyodide — CPython compiled to WebAssembly, loaded from a CDN on first run (~10MB)'}
+            . The animation IS its execution.
+          </p>
+        </>
+      )}
+    >
+      <header className="algo-header">
           <div className="algo-meta">
             <span className="pill">Playground</span>
             <span className="pill ghost">{lang === 'js' ? 'JavaScript' : 'Python'}</span>
@@ -125,7 +139,6 @@ export function Playground() {
         )}
 
         {result && <Player result={result} code={code} />}
-      </main>
-    </div>
+    </AppShell>
   );
 }
