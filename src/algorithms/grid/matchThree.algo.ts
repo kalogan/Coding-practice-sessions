@@ -117,6 +117,32 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Scan each row left→right, then each column top→bottom, tracking the start of the current run of equal symbols. When the run breaks (or the line ends) and its length is ≥ 3, mark every cell in it. Dedupe cells with a Set since one cell can sit in both a horizontal and a vertical match.',
   complexity: 'O(rows·cols) time',
+  difficulty: 'Medium',
+  eli5: `## Everyday analogy
+
+Picture a candy-board referee with two passes of a magnifying glass. First they slide it across each row left to right looking for three-or-more identical candies in a line; then they slide it down each column. Any candy caught in either pass gets a sticker. Some candies get stickered twice (once across, once down) — but a candy only counts once.
+
+## What problem it solves
+
+In a match-3 game, you need every cell that belongs to a straight run of 3+ identical gems so the board knows what to clear. The \`answer\` is the count of *distinct* such cells.
+
+## How it works step by step
+
+- Parse rows into a 2-D \`grid\`. Keep a \`matched\` Set of \`"r,c"\` keys so duplicates collapse automatically.
+- Horizontal pass: for each row, track \`start\` of the current run. When \`grid[r][c]\` differs from \`grid[r][start]\` (or the row ends), if the run length \`c - start >= 3\`, add every cell in it via \`recordHorizontal\`.
+- Vertical pass: the same logic walking down each column with \`recordVertical\`.
+
+## Why the Set matters
+
+A cell can sit in both a horizontal and a vertical match. Adding to a Set keyed by position means it's counted once no matter how many runs cover it — that's why the answer is \`matched.size\`.
+
+## Complexity in plain terms
+
+Each cell is visited a constant number of times across both passes: O(rows·cols).
+
+## Common pitfalls
+
+Off-by-one on run length (a run of exactly 3 must count, so the test is \`>= 3\`); forgetting to flush the final run when a line ends — the loop runs \`c\` up to \`cols\` (one past the end) precisely to trigger that flush; and double-counting overlap cells if you used a plain counter instead of a Set.`,
   defaultInput: { words: ['RRRB', 'GBGB', 'GGGB', 'YBYB'] },
   expected: 10,
   run,

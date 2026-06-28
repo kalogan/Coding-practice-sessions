@@ -158,6 +158,36 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'BST invariant: left subtree < node < right subtree. To search, start at the root and compare: equal → found; target smaller → recurse left; target larger → recurse right. Each comparison discards one whole subtree, so a balanced tree gives O(log n). The same walk drives insert (descend until you hit an empty slot).',
   complexity: 'O(h) search',
+  difficulty: 'Easy',
+  eli5: `## The everyday picture
+
+Think of looking up a word in a paper dictionary. You don't read every page — you flip to the middle, see whether your word comes before or after, and throw away the half that can't contain it. A binary search tree is that dictionary made of nodes: at every node you decide "left or right" and discard a whole branch.
+
+## What problem it solves
+
+It finds whether a value exists in a sorted collection (and the path to it) far faster than scanning every element.
+
+## How it works, step by step
+
+- First we BUILD the tree: each value from \`values\` is inserted by walking down from \`root\`, going left when it's smaller than the current node and right when it's larger, until we hit an empty slot.
+- Then we SEARCH for \`target\`. Starting at \`root\`, we compare \`target\` to the current \`nodeVal\`:
+  - equal → found it, record the node as \`match\`;
+  - \`target < nodeVal\` → go \`left\`;
+  - otherwise → go \`right\`.
+- We push each visited value onto \`path\`, which becomes the root-to-target trail. If we step off into a \`null\` child, the target isn't in the tree.
+
+## Why it's correct and efficient
+
+The BST invariant — every left subtree is smaller, every right subtree larger — means one comparison always rules out an entire subtree. No value can hide in the branch you discarded.
+
+## Complexity in plain terms
+
+The work equals the tree's height \`h\`. A balanced tree has height about \`log n\`, so search is \`O(log n)\`. But a tree built from already-sorted input degrades into a straight line — height n — so search becomes \`O(n)\`.
+
+## Common pitfalls
+
+- Inserting sorted data makes a lopsided tree and kills performance (real code uses self-balancing trees).
+- Using \`<=\` vs \`<\` inconsistently between insert and search corrupts the invariant.`,
   defaultInput: { array: [8, 3, 10, 1, 6, 14, 4, 7, 13], params: { target: 7 } },
   expected: '8 3 6 7',
   run,

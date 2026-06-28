@@ -100,6 +100,32 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Single-pass lexer / tokenization: split into chunks, then classify each token against a small grammar with a clear fall-through to an "invalid" bucket so malformed input is handled gracefully. Each token is examined exactly once.',
   complexity: 'O(n) time',
+  difficulty: 'Easy',
+  eli5: `## Everyday analogy
+
+Imagine a postal sorter standing at a conveyor belt. Each envelope (a chunk of text) slides past, and the sorter glances at it and drops it into one of four bins: "notes", "rests", "bars", or "junk". They never go back; one glance per envelope is enough.
+
+## What problem it solves
+
+Raw text like \`C4 E4 G4 | A4 r2 G4 X9\` has no meaning to a program yet — it's just characters. *Tokenizing* (lexing) turns it into a stream of labelled pieces so later stages can reason about structure. Here the final \`answer\` is simply how many valid notes appeared.
+
+## How it works step by step
+
+- Split the text on spaces and drop empty chunks: \`text.split(' ').filter(Boolean)\`.
+- For each chunk, \`classify\` tries the rules in order: a NOTE matches \`/^[A-G][0-9]$/\` (pitch + octave), a REST matches \`/^r[0-9]$/\`, a BAR is exactly \`'|'\`, and anything else falls through to \`'invalid'\`.
+- A counter for each kind is bumped; \`notes\` is the one we return.
+
+## Why it's correct and efficient
+
+The rules are mutually exclusive and the \`else\` branch is a catch-all, so every token lands in exactly one bin — malformed input like \`X9\` can't crash anything, it's just flagged invalid. Each token is examined once.
+
+## Complexity in plain terms
+
+One pass over \`n\` tokens, constant work each, so O(n) time.
+
+## Common pitfalls
+
+Forgetting the fall-through "invalid" bucket (then bad input slips through silently), or anchoring the regex loosely so \`C44\` wrongly counts as a note — the \`^...$\` anchors prevent that.`,
   defaultInput: { text: 'C4 E4 G4 | A4 r2 G4 X9' },
   expected: 5,
   run,

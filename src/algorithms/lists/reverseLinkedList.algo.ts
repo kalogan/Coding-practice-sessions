@@ -85,6 +85,36 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Walk cur from head to null. Each step: save next = cur.next, point cur.next back at prev, then slide prev and cur forward. When cur is null, prev is the new head. O(n) time, O(1) space.',
   complexity: 'O(n) time · O(1) space',
+  difficulty: 'Easy',
+  eli5: `## The everyday picture
+
+Picture a conga line where everyone holds the shoulders of the person ahead. To reverse the line without anyone moving their feet, each person turns around one at a time and grabs the shoulders of whoever is now behind them. Do it down the line and the whole conga now faces the other way.
+
+## What problem it solves
+
+It flips a singly linked list so it runs back-to-front, rewiring the \`next\` pointers in place without building a new list.
+
+## How it works, step by step
+
+It's the classic three-pointer dance:
+
+- \`prev\` starts at \`null\`, \`cur\` starts at the head.
+- Each loop: save \`nxt = next[cur]\` so we don't lose the rest of the list, then flip \`next[cur] = prev\` to point this node backwards.
+- Slide forward: \`prev = cur\`, then \`cur = nxt\`.
+- When \`cur\` falls off the end (becomes \`null\`), \`prev\` is sitting on the last node we touched — that's the new head.
+
+## Why it's correct and efficient
+
+The saved \`nxt\` is the whole trick: the moment you overwrite \`cur.next\`, the original forward link is gone, so you MUST grab it first or you'd strand the rest of the list. Each node's pointer is flipped exactly once, in order, so the chain stays fully connected throughout.
+
+## Complexity in plain terms
+
+We visit each of the \`n\` nodes once — \`O(n)\` time. We only juggle three pointers regardless of list size — \`O(1)\` extra space.
+
+## Common pitfalls
+
+- Flipping \`cur.next = prev\` BEFORE saving \`nxt\` — you lose the tail and can never advance.
+- Returning \`cur\` instead of \`prev\`: when the loop ends \`cur\` is \`null\`, while \`prev\` is the real new head.`,
   defaultInput: { array: [1, 2, 3, 4] },
   expected: '4 3 2 1',
   run,

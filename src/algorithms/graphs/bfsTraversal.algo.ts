@@ -119,6 +119,32 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Queue-based frontier: enqueue the source; repeatedly dequeue a node, visit it, and enqueue its not-yet-seen neighbours. Mark nodes seen on enqueue (not on visit) so each is queued once. O(V + E).',
   complexity: 'O(V + E) time · O(V) space',
+  difficulty: 'Medium',
+  eli5: `## Everyday analogy
+
+Imagine telling a secret to one friend, who tells all *their* friends, who then tell all of *theirs*. The news spreads in rings: everyone one hop away hears it first, then everyone two hops away, and so on. BFS explores a graph in exactly these waves.
+
+## What problem it solves
+
+Given a friend network (edges like \`"A-B"\`, friendships bidirectional) and a starting person \`source\`, BFS visits everyone reachable, nearest-first. That ordering is what makes it the go-to for shortest-path-in-hops and "spread" problems.
+
+## How it works step by step
+
+- Build an adjacency map, then seed a \`queue\` with the \`source\` and mark it \`enqueued\`.
+- Loop while the queue isn't empty: \`shift()\` the front node (FIFO), record it in \`order\`, and look at its neighbours.
+- For each neighbour not yet \`enqueued\`, mark it seen and \`push\` it to the back of the queue.
+
+## Why marking on enqueue matters
+
+The key subtlety: nodes are marked seen *when added to the queue*, not when visited. If you waited until visiting, the same node could be queued several times by different neighbours, inflating work and possibly revisiting. Marking on enqueue guarantees each node is queued exactly once.
+
+## Complexity in plain terms
+
+Every vertex is processed once and every edge is looked at once (twice, since edges are bidirectional, but still constant per edge): O(V + E) time, O(V) space for the queue and seen-set.
+
+## Common pitfalls
+
+Using a stack instead of a queue (that's DFS, depth-first, wrong order); marking seen on dequeue (duplicates); or forgetting edges are bidirectional so half the network never gets reached.`,
   defaultInput: { words: ['A-B', 'A-C', 'B-D', 'C-D', 'D-E', 'C-F'], text: 'A' },
   expected: 'A B C D F E',
   run,

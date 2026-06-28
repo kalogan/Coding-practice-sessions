@@ -96,6 +96,32 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Stack-based path normalization: split on "/", then walk the segments. Skip "" and "."; on ".." pop the stack (if non-empty); otherwise push the real directory name. The canonical path is "/" + stack joined by "/". The edge cases are the whole point.',
   complexity: 'O(n) time · O(n) space',
+  difficulty: 'Medium',
+  eli5: `## Everyday analogy
+
+Think of walking through a building while keeping a stack of sticky notes, one per room you've entered. Walking into a room adds a note; ".." means "go back out the door I came in", so you peel the top note off; "." means "stay put"; and an empty hallway segment means nothing at all. The notes still on the pile, read bottom to top, *are* your final location.
+
+## What problem it solves
+
+A path like \`/home/../usr//bin/./test/\` is messy: double slashes, a trailing slash, \`.\` and \`..\`. Canonicalizing collapses all of that into one clean path, here \`/usr/bin/test\`. The edge cases are the entire task.
+
+## How it works step by step
+
+- Split on \`'/'\`. This produces \`''\` for leading, double, and trailing slashes.
+- Walk the \`segments\`. Skip \`''\` and \`'.'\` (they contribute nothing). On \`'..'\`, pop the \`stack\` *if it isn't empty*. Otherwise the segment is a real directory name — push it.
+- The answer is \`'/' + stack.join('/')\`.
+
+## Why it's correct
+
+A stack mirrors directory nesting exactly: pushing descends, popping ascends. Guarding the pop with \`stack.length\` makes \`..\` at the root a safe no-op instead of an error, matching real filesystem behaviour.
+
+## Complexity in plain terms
+
+One pass over \`n\` characters, with a stack that can hold at most all segments: O(n) time and O(n) space.
+
+## Common pitfalls
+
+Popping an empty stack (crash, or a stray leading slash); forgetting the empty-string case so \`//\` leaves blanks in the output; or mishandling the trailing slash.`,
   defaultInput: { text: '/home/../usr//bin/./test/' },
   expected: '/usr/bin/test',
   run,

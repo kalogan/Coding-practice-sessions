@@ -142,6 +142,36 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Build a (|A|+1) × (|B|+1) table where dp[i][j] is the edit distance between the first i chars of A and the first j chars of B. Base column dp[i][0] = i, base row dp[0][j] = j. For each inner cell, if the current chars match it copies the diagonal (free); otherwise it is 1 + the min of its top (delete), left (insert), and diagonal (substitute) neighbours. The answer sits in the bottom-right corner.',
   complexity: 'O(m·n) time · O(m·n) space',
+  difficulty: 'Medium',
+  eli5: `## The everyday picture
+
+You typed "horse" but meant "ros". How many single-keystroke fixes — insert a letter, delete a letter, or retype one — get you there with the fewest moves? Edit distance counts exactly that minimum. It's what spell-checkers use to guess what you meant.
+
+## What problem it solves
+
+It measures how different two strings are, as the smallest number of single-character edits to turn string \`A\` into string \`B\`.
+
+## How it works, step by step
+
+- We build a table \`dp\` with \`m + 1\` rows and \`n + 1\` columns. \`dp[i][j]\` = edits to convert A's first \`i\` letters into B's first \`j\` letters.
+- Base column \`dp[i][0] = i\`: turning a prefix into "" means deleting every letter. Base row \`dp[0][j] = j\`: building B from "" means inserting every letter.
+- For each inner cell we look at the current pair \`A[i-1]\` and \`B[j-1]\`:
+  - if they MATCH, the letters cost nothing, so we copy the diagonal: \`dp[i][j] = dp[i-1][j-1]\`.
+  - otherwise \`dp[i][j] = 1 + min(up, left, diag)\` — one edit plus the cheapest of delete (\`up\`), insert (\`left\`), or substitute (\`diag\`).
+- The answer is the bottom-right cell \`dp[m][n]\`.
+
+## Why it's correct and efficient
+
+Every cell depends only on three already-computed neighbours, so by filling row by row, left to right, each subproblem is solved exactly once and reused — that's dynamic programming. No edit sequence can do better than the minimum we carry forward.
+
+## Complexity in plain terms
+
+We fill an \`m × n\` grid once, so both time and memory are \`O(m·n)\`. (Memory can be reduced to one row, but this table version keeps the whole grid to visualise it.)
+
+## Common pitfalls
+
+- Off-by-one: \`A[i-1]\` not \`A[i]\`, because row/column 0 represents the empty prefix.
+- Mixing up which neighbour means insert vs delete flips nothing in the count but confuses the reconstruction of the actual edits.`,
   defaultInput: { words: ['horse', 'ros'] },
   expected: 3,
   run,

@@ -105,6 +105,26 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'A binary heap stored as a level-order array: node i has children 2i+1 and 2i+2, parent floor((i-1)/2). On insert, place the value at the next free leaf and sift it UP — swap with the parent while it is larger — to restore the heap property. The root is always the max. O(log n) per insert, O(1) peek.',
   complexity: 'O(log n) insert · O(1) max',
+  difficulty: 'Medium',
+  eli5: `## The everyday picture
+
+Think of a hospital triage queue, but you only ever need ONE thing fast: the most urgent patient right now. A max-heap is a clever almost-sorted pile where the biggest item is always sitting right on top, ready to grab, even as new items keep arriving.
+
+## What problem it solves
+
+You have a changing collection and constantly need the maximum. Re-sorting after every insert is wasteful. A max-heap gives you \`O(1)\` access to the max and only \`O(log n)\` work to add an item.
+
+## How it works, step by step
+
+The heap is just a flat array \`heap\` that we pretend is a binary tree: node \`i\` has children at \`2i+1\` and \`2i+2\`, and its parent is at \`floor((i-1)/2)\`. To insert a \`value\`, we \`push\` it onto the end (the next free leaf) and then SIFT UP: while \`heap[i] > heap[parent]\`, we swap them and set \`i = parent\`, climbing toward the root. We stop the moment the value is no bigger than its parent — the heap property is restored.
+
+## Why it's correct and efficient
+
+The heap property says every parent is at least as big as its children. Sifting up fixes the single spot we just disturbed: the new value bubbles past any smaller ancestors and settles where parents above it are all larger. Since a binary tree of \`n\` nodes is only about \`log n\` levels tall, each insert touches at most \`log n\` parents — that's the \`O(log n)\`. The max can never be anywhere but the root, so peeking \`heap[0]\` is \`O(1)\`.
+
+## Common pitfalls
+
+Mixing up the index math (the parent is \`(i-1)>>1\`, not \`i/2\`), or forgetting to \`break\` once the property holds — without the break you'd keep comparing pointlessly. For a MIN-heap you'd simply flip the comparison.`,
   defaultInput: { array: [5, 3, 8, 1, 9, 2, 7] },
   expected: 9,
   run,

@@ -147,6 +147,32 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Include/exclude depth-first recursion with backtracking. At index i we try two choices — take item[i] (only if it still fits) or skip it — then recurse on i+1. The call stack IS the current partial choice: each frame is one decision already made on the path from the root. We push a frame on a decision and pop it when we backtrack to try the alternative. A branch is pruned the moment including an item would breach the capacity, since that subtree can never produce a valid subset.',
   complexity: 'O(2^n) time · O(n) stack',
+  difficulty: 'Hard',
+  eli5: `## The everyday picture
+
+You're packing a backpack with a weight limit. Each item has a value, and you want the most valuable haul that still fits. The only sure way to know the best combo is to mentally try every possible set of items — take this one, leave that one — and remember the best total you ever saw.
+
+## What problem it solves
+
+Given \`items\` and a \`capacity\`, find the largest sum of a subset that does NOT exceed the capacity. This is knapsack-style optimization in its purest brute-force form.
+
+## How it works, step by step
+
+We do a depth-first recursion \`dfs(i, sum)\`. At each item index \`i\` we face one yes/no decision: INCLUDE \`items[i]\` (only if \`sum + items[i] <= capacity\`) or SKIP it. We recurse on \`i+1\` for each branch. When \`i\` reaches the end, the path of choices is a complete subset and its \`sum\` is a candidate; if \`sum > best\` we update \`best\`.
+
+The visual twist: the call stack IS the current partial choice. Each \`frames.push\` records one decision ("include 8", "skip 6"); on backtrack we \`frames.pop\` to undo it and try the alternative — exactly mirroring how the real recursion unwinds.
+
+## Why it's correct and why pruning is safe
+
+Trying both include and exclude at every item enumerates ALL \`2^n\` subsets, so the true best is never missed. We only refuse to include an item when \`sum + v > capacity\`; since values are non-negative, adding more later could never bring it back under, so that whole subtree is genuinely hopeless — pruning it loses nothing.
+
+## Complexity in plain terms
+
+With \`n\` items there are \`2^n\` subsets — the runtime doubles with each added item, so it's only practical for small \`n\`. The recursion depth (and stack) is \`O(n)\`.
+
+## Common pitfalls
+
+Forgetting that capacity pruning only works because values are non-negative; and forgetting to pop a frame on backtrack, which would leave stale decisions polluting later paths.`,
   defaultInput: { array: [8, 6, 5, 3], params: { capacity: 14 } },
   expected: 14,
   run,

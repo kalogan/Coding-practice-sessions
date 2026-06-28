@@ -135,6 +135,26 @@ const descriptor: AlgoDescriptor = {
   pattern:
     "Kahn's algorithm: compute each node's in-degree (number of unmet dependencies). Repeatedly remove a node with in-degree 0, append it to the order, and decrement its successors' in-degrees — any that reach 0 become ready. If every node is output, the order is valid; if some remain, there's a cycle. O(V + E).",
   complexity: 'O(V + E) time · O(V) space',
+  difficulty: 'Medium',
+  eli5: `## The everyday picture
+
+Imagine you're getting dressed. You can't put on shoes before socks, and you can't put on a jacket before a shirt. Topological sort is the algorithm that figures out a full get-dressed order that never violates any "X before Y" rule.
+
+## What problem it solves
+
+Given tasks with dependencies (here packages where \`C->A\` means "build C before A"), produce one linear order in which every task comes after everything it depends on. If the rules form a cycle (A waits on B which waits on A), no valid order exists.
+
+## How it works, step by step
+
+We use Kahn's algorithm. First we count each node's \`indeg\` — how many arrows point INTO it, i.e. how many unmet dependencies it has. Anything with \`indeg === 0\` needs nothing, so it goes into the \`ready\` set. We repeatedly pull a node out of \`ready\`, append it to \`order\`, and "relax" its outgoing edges: for each successor we do \`--indeg\`. The moment a successor's count hits 0, all its dependencies are satisfied, so it joins \`ready\`. (We keep \`ready\` sorted only so the output is deterministic.)
+
+## Why it's correct and efficient
+
+A node is only emitted once its dependency count reaches zero, so it always appears after every prerequisite — correctness by construction. Each node enters \`ready\` once and each edge is relaxed once, giving \`O(V + E)\`: linear in the graph size.
+
+## Common pitfalls
+
+If \`order.length !== nodes.length\` at the end, leftover nodes are trapped in a cycle and there is NO valid ordering — don't return a partial order as if it were complete.`,
   defaultInput: { words: ['C->A', 'C->B', 'A->D', 'B->D'] },
   expected: 'C A B D',
   run,

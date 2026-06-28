@@ -123,6 +123,34 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Adjacent-swap sort with a shrinking boundary: after pass p the last p elements are final, so each pass scans one fewer element. A pass with zero swaps means the array is already sorted — stop early.',
   complexity: 'O(n²) time · O(1) space',
+  difficulty: 'Easy',
+  eli5: `## The everyday picture
+
+Imagine a line of people sorted by height, but they're standing in random order. You walk down the line looking at each neighbouring PAIR. Whenever the taller person is on the left, you ask them to swap places. By the time you reach the end of the line, the very tallest person has been "pushed" all the way to the right edge — they bubbled up to the top. Repeat the walk, and the second-tallest settles next to them, and so on.
+
+## What problem it solves
+
+It puts a list of numbers into order from smallest to largest, using nothing but comparisons of neighbours and swaps.
+
+## How it works, step by step
+
+- We work on a copy \`values\` so we don't mutate the caller's array.
+- \`sortedFrom\` marks where the already-settled tail begins; everything at or past it is final.
+- The outer \`pass\` loop walks the list repeatedly. The inner loop compares \`values[i]\` with \`values[i + 1]\`; if the left one is bigger, we swap them and set \`swappedThisPass\`.
+- After each pass the biggest unsorted value has reached position \`sortedFrom - 1\`, so we shrink \`sortedFrom\` by one — the next pass can skip that settled tail.
+
+## Why it's correct and efficient
+
+Each pass guarantees the largest remaining value reaches its final slot, so after \`n - 1\` passes everything is in place. The \`swappedThisPass\` flag is the clever bit: if a whole pass swaps nothing, the list is already ordered and we \`break\` early.
+
+## Complexity in plain terms
+
+In the worst case (reverse-sorted) we do about n×n comparisons — \`O(n²)\`. We only ever swap in place, so extra memory is \`O(1)\`.
+
+## Common pitfalls
+
+- Forgetting to shrink the inner-loop bound (\`sortedFrom - 1\`) re-checks already-sorted elements — correct but wasteful.
+- Dropping the early-exit flag makes a nearly-sorted list still cost the full O(n²).`,
   defaultInput: { array: [5, 2, 8, 1, 4] },
   expected: '1 2 4 5 8',
   run,

@@ -147,6 +147,30 @@ const descriptor: AlgoDescriptor = {
   pattern:
     'Build a bidirectional adjacency set, then enumerate triples with strict ordering i<j<k over the sorted node ids. The ordering guarantees each unordered set of three is examined exactly once, so triangles are never double-counted. A triple is a triangle iff all three of its edges exist. O(V^3).',
   complexity: 'O(V^3) time (triple scan)',
+  difficulty: 'Easy',
+  eli5: `## The everyday picture
+
+Picture a group of friends. A "triangle" is any three people who are ALL friends with each other — a tight little clique of three. We want to count how many such trios exist, counting each trio only once (the trio {A, B, C} is the same trio no matter the order you name them).
+
+## What problem it solves
+
+Triangle counting is a basic measure of how tightly knit a social network is. Here friendships come as \`A-B\` strings and are bidirectional, so the adjacency set stores both \`adj.get(a).add(b)\` and \`adj.get(b).add(a)\`.
+
+## How it works, step by step
+
+We sort the people into \`ids\`, then loop over every triple with strict ordering: \`i < j < k\`. That gives us three people \`a\`, \`b\`, \`c\`. A triple is a triangle only if all THREE friendships exist — we check \`friends(a,b) && friends(a,c) && friends(b,c)\`. If all three hold, we increment \`count\`.
+
+## Why it's correct and why we avoid duplicates
+
+The strict \`i < j < k\` ordering is the key trick. Because indices strictly increase, each unordered set of three people is generated exactly once — we never see {A,B,C} again as {B,A,C}. So every real triangle is counted exactly one time, no division-by-6 fudging needed.
+
+## Complexity in plain terms
+
+Three nested loops over the people give \`O(V^3)\` — fine for small networks, but it grows fast. With \`V\` people you examine roughly \`V^3/6\` triples. Faster algorithms exist for large graphs, but this brute-force version is the clearest to understand.
+
+## Common pitfalls
+
+Forgetting to add BOTH directions to the adjacency set, or using \`i <= j\` instead of \`i < j\`, which would let a person pair with themselves and inflate the count.`,
   defaultInput: { words: ['A-B', 'A-C', 'B-C', 'B-D', 'C-D'] },
   expected: 2,
   run,
