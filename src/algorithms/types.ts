@@ -23,6 +23,24 @@ export interface StateField {
   highlight?: boolean;
 }
 
+/** per-bar colour in an array view (sorting: comparing / swapping / settled) */
+export type BarRole = 'plain' | 'compare' | 'swap' | 'sorted' | 'min' | 'pivot';
+
+/** a node in a linked-list view; `next` is the id it points at (or null) */
+export interface ListNode {
+  id: string;
+  value: string | number;
+  next: string | null;
+  role?: 'plain' | 'active' | 'visited' | 'match';
+}
+
+/** a labelled cursor drawn above a list node (head / prev / cur / slow / fast) */
+export interface ListPointer {
+  label: string;
+  target: string | null;
+  role?: 'slow' | 'fast' | 'head' | 'prev' | 'cur' | 'plain';
+}
+
 /** one token in a tokens view; `role` maps to a colour in the renderer */
 export interface Token {
   text: string;
@@ -41,7 +59,7 @@ export interface Frame {
 /** one cell in a grid view */
 export interface Cell {
   value: string | number;
-  role?: 'plain' | 'match' | 'active' | 'cleared';
+  role?: 'plain' | 'match' | 'active' | 'cleared' | 'dep' | 'done';
 }
 
 /** a node in a graph view; x/y are normalized 0..1 positions the algorithm picks */
@@ -64,11 +82,19 @@ export interface GraphEdge {
 // Each step renders exactly one of these. Add a new kind here + a renderer in
 // src/harness/views, and every algorithm targeting it lights up for free.
 export type ViewState =
-  | { kind: 'array'; values: number[]; markers: Marker[]; window?: { start: number; end: number } }
+  | {
+      kind: 'array';
+      values: number[];
+      markers: Marker[];
+      window?: { start: number; end: number };
+      /** optional per-bar colour, parallel to values (sorting) */
+      bars?: BarRole[];
+    }
   | { kind: 'tokens'; tokens: Token[]; window?: { start: number; end: number } }
   | { kind: 'stack'; frames: Frame[] }
-  | { kind: 'grid'; rows: Cell[][] }
-  | { kind: 'graph'; nodes: GraphNode[]; edges: GraphEdge[] };
+  | { kind: 'grid'; rows: Cell[][]; colHeaders?: string[]; rowHeaders?: string[] }
+  | { kind: 'graph'; nodes: GraphNode[]; edges: GraphEdge[] }
+  | { kind: 'list'; nodes: ListNode[]; pointers?: ListPointer[] };
 
 export interface TraceStep {
   /** what to draw for this step (self-contained) */

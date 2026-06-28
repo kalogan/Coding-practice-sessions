@@ -30,3 +30,34 @@ export function binaryTreeLayout(count: number): Array<{ x: number; y: number }>
   }
   return out;
 }
+
+/**
+ * Lays out a (possibly unbalanced) binary search tree: x by in-order rank, y by
+ * depth — so the picture matches the BST's actual shape. `childrenOf(id)` returns
+ * the left/right child ids of a node.
+ */
+export function bstLayout(
+  root: string | null,
+  childrenOf: (id: string) => { left?: string | null; right?: string | null },
+): Record<string, { x: number; y: number }> {
+  const pos: Record<string, { x: number; y: number }> = {};
+  let order = 0;
+  let maxDepth = 0;
+  const walk = (id: string | null | undefined, depth: number) => {
+    if (!id) return;
+    const { left, right } = childrenOf(id);
+    walk(left, depth + 1);
+    pos[id] = { x: order++, y: depth };
+    maxDepth = Math.max(maxDepth, depth);
+    walk(right, depth + 1);
+  };
+  walk(root, 0);
+  const n = order;
+  for (const id of Object.keys(pos)) {
+    pos[id] = {
+      x: (pos[id].x + 1) / (n + 1),
+      y: maxDepth === 0 ? 0.4 : pos[id].y / maxDepth,
+    };
+  }
+  return pos;
+}

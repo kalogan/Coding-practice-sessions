@@ -13,10 +13,12 @@ export const JS_TEMPLATE = `// Write a run(input, trace) function.
 //  • return your answer.
 //
 // View kinds you can render:
-//   { kind: 'array',  values: [n], markers: [{index, role:'left'|'right'|'window', label}], window: {start,end} }
+//   { kind: 'array',  values: [n], markers: [{index, role:'left'|'right'|'window', label}], window: {start,end}, bars: ['compare'|'swap'|'sorted'|...] }
 //   { kind: 'tokens', tokens: [{text, role, label}], window: {start,end} }
 //   { kind: 'stack',  frames: [{title, detail, status:'active'|'returning'|'done'}] }
-//   { kind: 'grid',   rows: [[{value, role}]] }
+//   { kind: 'grid',   rows: [[{value, role}]], colHeaders: [...], rowHeaders: [...] }
+//   { kind: 'graph',  nodes: [{id, label, x, y, role}], edges: [{from, to, directed, role}] }
+//   { kind: 'list',   nodes: [{id, value, next, role}], pointers: [{label, target, role}] }
 
 function run(input, trace) {
   const a = input.array;

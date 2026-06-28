@@ -13,13 +13,14 @@ export function ArrayView({ view }: { view: ArrayState }) {
         const markers = view.markers.filter((m) => m.index === i);
         const left = markers.find((m) => m.role === 'left');
         const right = markers.find((m) => m.role === 'right');
+        const barRole = view.bars?.[i] ?? 'plain';
         return (
           <div key={i} className={`cell${inWindow ? ' in-window' : ''}`} data-testid={`cell-${i}`}>
             <div className="pointers">
               {left && <span className="ptr ptr-left">{left.label ?? 'L'}▾</span>}
               {right && <span className="ptr ptr-right">{right.label ?? 'R'}▾</span>}
             </div>
-            <div className="bar" style={{ height: `${(value / max) * 150 + 22}px` }}>
+            <div className={`bar bar-${barRole}`} style={{ height: `${(value / max) * 150 + 22}px` }}>
               <span className="bar-value">{value}</span>
             </div>
             <div className="index">{i}</div>

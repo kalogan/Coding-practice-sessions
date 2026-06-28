@@ -222,6 +222,23 @@ body {
   border-color: var(--accent);
   background: linear-gradient(180deg, #2f4a73, #25344d);
 }
+/* per-bar roles (sorting) */
+.bar-compare {
+  border-color: var(--accent) !important;
+  background: linear-gradient(180deg, #2f4a73, #25344d) !important;
+}
+.bar-swap {
+  border-color: var(--hot) !important;
+  background: linear-gradient(180deg, #5a3a1e, #3a2a18) !important;
+}
+.bar-min,
+.bar-pivot {
+  border-color: var(--accent-2) !important;
+}
+.bar-sorted {
+  border-color: var(--accent-2) !important;
+  background: linear-gradient(180deg, #20392a, #1b2c22) !important;
+}
 .bar-value {
   font-size: 13px;
   font-weight: 600;
@@ -377,6 +394,100 @@ body {
 .grid-cell.role-cleared {
   opacity: 0.25;
   transform: scale(0.85);
+}
+.grid-cell.role-dep {
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.18);
+}
+.grid-cell.role-done {
+  border-color: var(--accent-2);
+  background: #1b2c22;
+}
+.grid-head {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.grid-head.corner {
+  opacity: 0;
+}
+
+/* ---------- linked-list view ---------- */
+.list-view {
+  margin: 30px 0 18px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: 200px;
+}
+.list-view svg {
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  display: block;
+}
+.list-edge {
+  stroke: var(--muted);
+  stroke-width: 3;
+}
+.list-arrowhead {
+  fill: var(--muted);
+}
+.list-null {
+  fill: var(--muted);
+  font-size: 24px;
+  font-weight: 700;
+}
+.list-node rect {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 3;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.list-node text {
+  fill: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+.list-node.role-active rect {
+  fill: #2f4a73;
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+.list-node.role-visited rect {
+  fill: #20392a;
+  stroke: var(--accent-2);
+}
+.list-node.role-match rect {
+  fill: #3a2f12;
+  stroke: var(--hot);
+  stroke-width: 4;
+}
+.list-pointer text {
+  font-size: 18px;
+  font-weight: 700;
+  fill: var(--accent);
+}
+.list-pointer line {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.list-pointer.role-fast text,
+.list-pointer.role-fast line {
+  fill: var(--hot);
+  stroke: var(--hot);
+}
+.list-pointer.role-slow text,
+.list-pointer.role-slow line {
+  fill: var(--accent-2);
+  stroke: var(--accent-2);
 }
 
 /* ---------- graph view ---------- */
