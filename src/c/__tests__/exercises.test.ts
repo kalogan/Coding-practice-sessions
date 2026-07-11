@@ -35,8 +35,15 @@ describe('assembleFunctionSource', () => {
 });
 
 describe('exercise registry (zero-wiring)', () => {
-  it('discovers exercises', () => {
-    expect(cExercises.length).toBeGreaterThanOrEqual(5);
+  it('discovers the full curriculum (50+ sessions)', () => {
+    // Floor, not exact: a DROP below this with the gate green means sessions were
+    // deleted, not that they passed. Raise it as the ladder grows.
+    expect(cExercises.length).toBeGreaterThanOrEqual(50);
+  });
+
+  it('covers at least 10 curriculum modules', () => {
+    const modules = new Set(cExercises.map((e) => e.module));
+    expect(modules.size).toBeGreaterThanOrEqual(10);
   });
 
   it('has unique ids and unique order values', () => {
