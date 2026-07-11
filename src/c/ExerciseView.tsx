@@ -4,6 +4,7 @@ import { compiler } from './engine';
 import { runExercise } from './exercises/runner';
 import type { ExerciseRunResult } from './exercises/runner';
 import type { CExercise } from './exercises/types';
+import { LessonPanel } from './LessonPanel';
 
 interface Props {
   exercise: CExercise;
@@ -29,7 +30,9 @@ export function ExerciseView({ exercise }: Props) {
   const passed = result?.passed ?? false;
 
   return (
-    <>
+    <div className="c-session">
+      {exercise.lesson && <LessonPanel lesson={exercise.lesson} title={exercise.title} />}
+      <div className="c-session-main">
       <header className="algo-header">
         <div className="algo-meta">
           <span className="pill">{exercise.module}</span>
@@ -125,6 +128,7 @@ export function ExerciseView({ exercise }: Props) {
           )}
         </section>
       </div>
-    </>
+      </div>
+    </div>
   );
 }

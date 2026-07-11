@@ -4,6 +4,30 @@
 export type CMode = 'function' | 'program';
 export type CDifficulty = 'intro' | 'easy' | 'medium' | 'hard';
 
+/** A deeper walkthrough block inside a lesson. */
+export interface LessonSection {
+  heading: string;
+  /** paragraphs separated by blank lines; inline `code` in backticks is rendered. */
+  body: string;
+}
+
+/** The teacher content shown in the right-hand panel — this is what turns an
+ *  exercise into a taught SESSION. Rich by design (concept → example → pitfalls). */
+export interface Lesson {
+  /** the hook: the core idea in plain language (may be several paragraphs). */
+  intro: string;
+  /** deeper parts of the explanation. */
+  sections?: LessonSection[];
+  /** a worked example — code + commentary. Rendered monospace. */
+  workedExample?: string;
+  /** why this matters / where it shows up in real code. */
+  whyItMatters?: string;
+  /** the mistakes learners actually make here. */
+  commonMistakes?: string[];
+  /** a nudge toward the exercise, revealed on demand. */
+  hint?: string;
+}
+
 /** program-mode: the user writes their own main(); we feed stdin, diff stdout. */
 export interface CProgramCase {
   name?: string;
@@ -24,6 +48,8 @@ export interface CExercise {
   prompt: string;
   /** starter code shown in the editor. */
   starter: string;
+  /** the teacher panel for this session (the right-hand explanation). */
+  lesson?: Lesson;
 
   // ── function mode ──
   /** a C harness containing main() that calls the user's function and prints a

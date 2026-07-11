@@ -63,6 +63,13 @@ describe('exercise registry (zero-wiring)', () => {
     expect(flat.length).toBe(cExercises.length);
   });
 
+  it('every session teaches — a non-empty lesson.intro', () => {
+    for (const e of cExercises) {
+      expect(e.lesson, `${e.id}: lesson`).toBeDefined();
+      expect(e.lesson?.intro.trim().length, `${e.id}: lesson.intro`).toBeGreaterThan(0);
+    }
+  });
+
   it('every exercise is well-formed for its mode', () => {
     for (const e of cExercises) {
       expect(e.id, `${e.id}: id`).toBeTruthy();
