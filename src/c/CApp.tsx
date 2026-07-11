@@ -4,19 +4,30 @@ import { compiler } from './engine';
 import { Sandbox } from './Sandbox';
 import { ExerciseView } from './ExerciseView';
 import { cExercises, exercisesByModule, getExercise } from './exercises/registry';
+import type { CExercise } from './exercises/types';
 import { loadCompleted, saveCompleted, toggleId } from './progress';
 
 type WarmState = 'warming' | 'ready' | 'error';
 type Mode = 'exercises' | 'sandbox';
+
+// The learner's current spot: the first session they haven't marked done.
+function firstUnfinished(done: Set<string>): CExercise | undefined {
+  return cExercises.find((e) => !done.has(e.id)) ?? cExercises[0];
+}
 
 // The /c-programming IDE. Exercise-led ladder + a free sandbox, over real gcc
 // (hosted via Wandbox) that warms in the background on mount.
 export function CApp() {
   const [warm, setWarm] = useState<WarmState>('warming');
   const [mode, setMode] = useState<Mode>('exercises');
-  const [exerciseId, setExerciseId] = useState<string>(cExercises[0]?.id ?? '');
   // Which sessions the learner has marked done — persisted to localStorage.
   const [completed, setCompleted] = useState<Set<string>>(() => loadCompleted());
+  // Resume where they left off, and open ONLY that session's module (the rail is
+  // massive with all 22 modules expanded).
+  const [exerciseId, setExerciseId] = useState<string>(() => firstUnfinished(completed)?.id ?? '');
+  const [openModule, setOpenModule] = useState<string>(
+    () => getExercise(exerciseId)?.module ?? '',
+  );
 
   function toggleDone(id: string) {
     setCompleted((prev) => {
@@ -75,29 +86,50 @@ export function CApp() {
                 sessions done
               </p>
               <nav className="cx-ladder" data-testid="c-ladder" aria-label="Exercise ladder">
-                {groups.map((g) => (
-                  <div key={g.module} className="cx-ladder-group">
-                    <h3 className="cx-ladder-title">{g.module}</h3>
-                    {g.items.map((ex) => {
-                      const isDone = completed.has(ex.id);
-                      return (
-                        <button
-                          key={ex.id}
-                          className={`picker-item cx-rung${ex.id === exerciseId ? ' active' : ''}${isDone ? ' done' : ''}`}
-                          onClick={() => {
-                            setExerciseId(ex.id);
-                            close();
-                          }}
-                        >
-                          <span className="cx-rung-check" aria-hidden="true">
-                            {isDone ? '✓' : ''}
-                          </span>
-                          <span className="cx-rung-title">{ex.title}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
+                {groups.map((g) => {
+                  const open = openModule === g.module;
+                  const doneCount = g.items.filter((i) => completed.has(i.id)).length;
+                  return (
+                    <div key={g.module} className={`cx-ladder-group${open ? ' open' : ''}`}>
+                      <button
+                        type="button"
+                        className="cx-ladder-title"
+                        aria-expanded={open}
+                        onClick={() => setOpenModule(open ? '' : g.module)}
+                      >
+                        <span className="cx-caret" aria-hidden="true">
+                          {open ? '▾' : '▸'}
+                        </span>
+                        <span className="cx-ladder-name">{g.module}</span>
+                        <span className="cx-ladder-count">
+                          {doneCount}/{g.items.length}
+                        </span>
+                      </button>
+                      {open && (
+                        <div className="cx-ladder-items">
+                          {g.items.map((ex) => {
+                            const isDone = completed.has(ex.id);
+                            return (
+                              <button
+                                key={ex.id}
+                                className={`picker-item cx-rung${ex.id === exerciseId ? ' active' : ''}${isDone ? ' done' : ''}`}
+                                onClick={() => {
+                                  setExerciseId(ex.id);
+                                  close();
+                                }}
+                              >
+                                <span className="cx-rung-check" aria-hidden="true">
+                                  {isDone ? '✓' : ''}
+                                </span>
+                                <span className="cx-rung-title">{ex.title}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </nav>
             </>
           )}

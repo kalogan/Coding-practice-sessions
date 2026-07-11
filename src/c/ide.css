@@ -285,24 +285,72 @@
   margin-bottom: 2px;
 }
 
-/* Exercise ladder in the sidebar */
+/* Exercise ladder in the sidebar — collapsible modules */
 .cx-ladder {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
   margin: 6px 0 4px;
 }
+.cx-ladder-group {
+  display: flex;
+  flex-direction: column;
+}
+/* Module header = a full-width toggle button, left-aligned */
 .cx-ladder-title {
-  margin: 6px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 2px 0;
+  padding: 7px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
 }
+.cx-ladder-title:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.cx-ladder-group.open .cx-ladder-title {
+  color: var(--text);
+}
+.cx-caret {
+  flex: 0 0 auto;
+  width: 10px;
+  font-size: 9px;
+  color: var(--muted);
+}
+.cx-ladder-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cx-ladder-count {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  opacity: 0.85;
+}
+.cx-ladder-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 6px 4px;
+}
+/* Rungs: force LEFT alignment — a global .picker-item rule sets space-between,
+   which otherwise shoves the title to the right edge. */
 .cx-rung {
   display: flex;
   align-items: baseline;
+  justify-content: flex-start;
   gap: 6px;
   text-align: left;
 }
@@ -313,7 +361,9 @@
   font-size: 12px;
 }
 .cx-rung-title {
+  flex: 1 1 auto;
   min-width: 0;
+  text-align: left;
 }
 .cx-rung.done .cx-rung-title {
   color: var(--muted);
