@@ -3,8 +3,8 @@ import type { CExercise } from '../types';
 const exercise: CExercise = {
   id: 'typedef-point',
   title: 'typedef: give a type a short name',
-  module: '15 · Files & Bigger Programs',
-  order: 1520,
+  module: '14 · The Preprocessor & Declarations',
+  order: 1450,
   difficulty: 'easy',
   mode: 'function',
   prompt: `Back in the structs module you wrote \`struct Point { ... }\` and had to say

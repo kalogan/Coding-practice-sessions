@@ -1,6 +1,6 @@
 # C Track — Curriculum Audit (2026-07-11)
 
-An honest assessment of the `/c-programming` track (121 sessions, 20 modules): can a working
+An honest assessment of the `/c-programming` track (133 sessions, 22 modules): can a working
 professional learn C from it, how long the basics take, what college courses it maps to, and the
 adjacent gaps worth picking up. Written to be candid — where it's thin, it says so.
 
@@ -42,7 +42,7 @@ compile/declare model):
 |---|---|---|---|---|
 | **The basics** | 1–9 (values → program I/O) | ~46 | **15–25 h** | **1–2 weeks** |
 | **Solid C** (adds pointers depth, structs, bits, linked lists/trees) | 1–13 | ~82 | 35–50 h | 3–5 weeks |
-| **Everything** (adds preprocessor, files, function pointers, and the full graphics track) | 1–20 | 121 | 70–100 h | 6–10 weeks |
+| **Everything** (adds preprocessor, files, function pointers, the full graphics track, tooling/debugging & a capstone project) | 1–22 | 133 | 80–115 h | 7–11 weeks |
 
 Per-session budget: ~15–35 min (read the lesson, do the exercise, let it sink in); the pointer, string,
 and transform sessions run longer. These are "understand it + pass the exercise" hours — true fluency

@@ -3,7 +3,7 @@ import type { CExercise } from '../types';
 const exercise: CExercise = {
   id: 'file-line-count',
   title: 'Round-trip: write lines, then count them',
-  module: '15 · Files & Bigger Programs',
+  module: '15 · Files & Program Structure',
   order: 1510,
   difficulty: 'medium',
   mode: 'program',

@@ -79,7 +79,7 @@ export const moduleResources: Record<string, CResource[]> = {
     { label: 'TutorialsPoint — Header Files in C', url: 'https://www.tutorialspoint.com/cprogramming/c_header_files.htm' },
     { label: 'GeeksforGeeks — C Preprocessors & Macros', url: 'https://www.geeksforgeeks.org/c/cc-preprocessors/' },
   ],
-  '15 · Files & Bigger Programs': [
+  '15 · Files & Program Structure': [
     { label: 'Programiz — C Files I/O (fopen/fprintf/fscanf)', url: 'https://www.programiz.com/c-programming/c-file-input-output' },
     { label: 'GeeksforGeeks — File Handling in C', url: 'https://www.geeksforgeeks.org/c/basics-file-handling-c/' },
   ],

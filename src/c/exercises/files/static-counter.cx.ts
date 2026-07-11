@@ -3,7 +3,7 @@ import type { CExercise } from '../types';
 const exercise: CExercise = {
   id: 'static-counter',
   title: 'static locals: memory between calls',
-  module: '15 · Files & Bigger Programs',
+  module: '15 · Files & Program Structure',
   order: 1540,
   difficulty: 'medium',
   mode: 'function',

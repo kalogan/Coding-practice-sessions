@@ -3,7 +3,7 @@ import type { CExercise } from '../types';
 const exercise: CExercise = {
   id: 'write-then-read-file',
   title: 'Write to a file, then read it back',
-  module: '15 · Files & Bigger Programs',
+  module: '15 · Files & Program Structure',
   order: 1500,
   difficulty: 'medium',
   mode: 'program',
