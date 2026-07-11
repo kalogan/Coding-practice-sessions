@@ -301,7 +301,56 @@
   color: var(--muted);
 }
 .cx-rung {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   text-align: left;
+}
+.cx-rung-check {
+  flex: 0 0 auto;
+  width: 12px;
+  color: var(--ok, #46d369);
+  font-size: 12px;
+}
+.cx-rung-title {
+  min-width: 0;
+}
+.cx-rung.done .cx-rung-title {
+  color: var(--muted);
+}
+
+/* progress count above the ladder */
+.cx-progress {
+  margin: 8px 0 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cx-progress-count {
+  font-weight: 800;
+  color: var(--fg, #dfe6f0);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Mark as done" — neutral until completed, then a filled green success state. */
+.cx-done {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cx-done:hover {
+  color: var(--fg, #fff);
+  border-color: var(--ok, #2ea043);
+}
+.cx-done.is-done {
+  background: color-mix(in srgb, var(--ok, #2ea043) 22%, transparent);
+  border-color: var(--ok, #2ea043);
+  color: var(--ok, #46d369);
 }
 
 /* Prompt text keeps the authored line breaks */

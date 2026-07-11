@@ -4,6 +4,7 @@ import { compiler } from './engine';
 import { Sandbox } from './Sandbox';
 import { ExerciseView } from './ExerciseView';
 import { cExercises, exercisesByModule, getExercise } from './exercises/registry';
+import { loadCompleted, saveCompleted, toggleId } from './progress';
 
 type WarmState = 'warming' | 'ready' | 'error';
 type Mode = 'exercises' | 'sandbox';
@@ -14,6 +15,16 @@ export function CApp() {
   const [warm, setWarm] = useState<WarmState>('warming');
   const [mode, setMode] = useState<Mode>('exercises');
   const [exerciseId, setExerciseId] = useState<string>(cExercises[0]?.id ?? '');
+  // Which sessions the learner has marked done — persisted to localStorage.
+  const [completed, setCompleted] = useState<Set<string>>(() => loadCompleted());
+
+  function toggleDone(id: string) {
+    setCompleted((prev) => {
+      const next = toggleId(prev, id);
+      saveCompleted(next);
+      return next;
+    });
+  }
 
   useEffect(() => {
     let alive = true;
@@ -56,25 +67,39 @@ export function CApp() {
           </div>
 
           {mode === 'exercises' && (
-            <nav className="cx-ladder" data-testid="c-ladder" aria-label="Exercise ladder">
-              {groups.map((g) => (
-                <div key={g.module} className="cx-ladder-group">
-                  <h3 className="cx-ladder-title">{g.module}</h3>
-                  {g.items.map((ex) => (
-                    <button
-                      key={ex.id}
-                      className={`picker-item cx-rung${ex.id === exerciseId ? ' active' : ''}`}
-                      onClick={() => {
-                        setExerciseId(ex.id);
-                        close();
-                      }}
-                    >
-                      {ex.title}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </nav>
+            <>
+              <p className="cx-progress" data-testid="c-progress">
+                <span className="cx-progress-count">
+                  {completed.size} / {cExercises.length}
+                </span>{' '}
+                sessions done
+              </p>
+              <nav className="cx-ladder" data-testid="c-ladder" aria-label="Exercise ladder">
+                {groups.map((g) => (
+                  <div key={g.module} className="cx-ladder-group">
+                    <h3 className="cx-ladder-title">{g.module}</h3>
+                    {g.items.map((ex) => {
+                      const isDone = completed.has(ex.id);
+                      return (
+                        <button
+                          key={ex.id}
+                          className={`picker-item cx-rung${ex.id === exerciseId ? ' active' : ''}${isDone ? ' done' : ''}`}
+                          onClick={() => {
+                            setExerciseId(ex.id);
+                            close();
+                          }}
+                        >
+                          <span className="cx-rung-check" aria-hidden="true">
+                            {isDone ? '✓' : ''}
+                          </span>
+                          <span className="cx-rung-title">{ex.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </nav>
+            </>
           )}
 
           <a className="preview-link" href="/">
@@ -106,7 +131,12 @@ export function CApp() {
       {mode === 'sandbox' && <Sandbox />}
       {mode === 'exercises' &&
         (selected ? (
-          <ExerciseView key={selected.id} exercise={selected} />
+          <ExerciseView
+            key={selected.id}
+            exercise={selected}
+            done={completed.has(selected.id)}
+            onToggleDone={() => toggleDone(selected.id)}
+          />
         ) : (
           <p className="c-console-body muted">No exercises found.</p>
         ))}

@@ -9,12 +9,14 @@ import { LessonPanel } from './LessonPanel';
 
 interface Props {
   exercise: CExercise;
+  done: boolean;
+  onToggleDone: () => void;
 }
 
 // One exercise: prompt + editor (starter) + Check. Runs the user's code through
 // the hidden harness / I/O cases and reports pass/fail per case. `key` on the
 // exercise id (in CApp) remounts this so state resets when you switch exercises.
-export function ExerciseView({ exercise }: Props) {
+export function ExerciseView({ exercise, done, onToggleDone }: Props) {
   const [code, setCode] = useState(exercise.starter);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<ExerciseRunResult | null>(null);
@@ -74,6 +76,15 @@ export function ExerciseView({ exercise }: Props) {
             aria-expanded={showSolution}
           >
             {showSolution ? 'Hide solution' : 'Show solution'}
+          </button>
+          <button
+            className={`ctl cx-done${done ? ' is-done' : ''}`}
+            onClick={onToggleDone}
+            aria-pressed={done}
+            data-testid="c-done"
+            title="Mark this session complete — saved on this device"
+          >
+            {done ? '✓ Completed' : 'Mark as done'}
           </button>
         </div>
 
