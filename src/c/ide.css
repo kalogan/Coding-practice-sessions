@@ -97,13 +97,20 @@
   color: var(--danger, #ff6b6b);
 }
 
+/* The C route is a full IDE, not the reading view — let it use the whole viewport
+   width instead of inheriting .stage's 980px reading cap (which left the right half
+   of a wide screen empty). Full-bleed on the C entry only. */
+.c-mode .stage {
+  max-width: none;
+}
+
 /* Session layout: coding column + the teacher panel on the right.
    Source order is lesson-first so it stacks ON TOP on mobile (teach, then code);
    on desktop the explicit columns put the lesson on the right. */
 .c-session {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+  gap: 24px;
   align-items: start;
 }
 .c-session-main {
@@ -258,9 +265,13 @@
   .lesson-panel {
     grid-column: 1;
   }
+  /* Teacher first, then code: stack the lesson ON TOP on narrow screens. */
   .lesson-panel {
-    grid-row: auto;
+    grid-row: 1;
     position: static;
+  }
+  .c-session-main {
+    grid-row: 2;
   }
   .lesson-scroll {
     max-height: none;
