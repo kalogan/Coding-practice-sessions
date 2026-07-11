@@ -6,9 +6,9 @@ type GridState = Extract<ViewState, { kind: 'grid' }>;
 // label the axes (handy for DP tables). `role` colours cells: match/active/
 // cleared (match-3) or dep/done (DP — a filled cell vs the cells it reads).
 export function GridView({ view }: { view: GridState }) {
-  const { rows, colHeaders, rowHeaders } = view;
+  const { rows, colHeaders, rowHeaders, pixel } = view;
   return (
-    <div className="grid-view" data-testid="grid-view">
+    <div className={`grid-view${pixel ? ' pixels' : ''}`} data-testid="grid-view">
       {colHeaders && (
         <div className="grid-row">
           {rowHeaders && <div className="grid-head corner" />}
@@ -23,8 +23,12 @@ export function GridView({ view }: { view: GridState }) {
         <div key={r} className="grid-row">
           {rowHeaders && <div className="grid-head">{rowHeaders[r]}</div>}
           {row.map((c, col) => (
-            <div key={col} className={`grid-cell role-${c.role ?? 'plain'}${c.arrow ? ' has-arrow' : ''}`}>
-              <span className="grid-cell-value">{c.value}</span>
+            <div
+              key={col}
+              className={`grid-cell role-${c.role ?? 'plain'}${c.arrow ? ' has-arrow' : ''}`}
+              style={c.fill ? { background: c.fill } : undefined}
+            >
+              {!pixel && <span className="grid-cell-value">{c.value}</span>}
               {c.arrow && <span className="grid-cell-arrow">{c.arrow}</span>}
             </div>
           ))}

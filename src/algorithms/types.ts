@@ -101,6 +101,8 @@ export interface Cell {
   role?: 'plain' | 'match' | 'active' | 'cleared' | 'dep' | 'done' | 'goal' | 'hazard' | 'wall';
   /** optional glyph drawn under the value (e.g. a policy arrow ↑ ↓ ← →) */
   arrow?: string;
+  /** explicit background colour — used for palette pixels (tile decoding) */
+  fill?: string;
 }
 
 /** a neuron in a neural-network view; x/y are normalized 0..1 positions */
@@ -134,8 +136,24 @@ export interface DataTable {
   heatMax?: number;
   highlightRow?: number;
   highlightCol?: number;
+  /** a single cell to spotlight (e.g. the C[i][j] being computed in matrix multiply) */
+  highlightCell?: { row: number; col: number };
   /** cells to flag as anomalies (NaN / out-of-range), drawn with a red border */
   flags?: Array<{ row: number; col: number }>;
+}
+
+/** one pane of a hex view — a byte buffer rendered as a classic hex dump */
+export interface HexPane {
+  label?: string;
+  /** the bytes (0..255 each) */
+  bytes: number[];
+  /** byte offset the cursor sits on (highlighted) */
+  cursor?: number;
+  /** other byte offsets to tint (e.g. a checksum region, a matched run) */
+  highlights?: number[];
+  /** draw the ASCII gutter on the right (default true) */
+  ascii?: boolean;
+  caption?: string;
 }
 
 /** a polyline series in a chart view, as [x, y] data points */
@@ -184,7 +202,14 @@ export type ViewState =
     }
   | { kind: 'tokens'; tokens: Token[]; window?: { start: number; end: number } }
   | { kind: 'stack'; frames: Frame[] }
-  | { kind: 'grid'; rows: Cell[][]; colHeaders?: string[]; rowHeaders?: string[] }
+  | {
+      kind: 'grid';
+      rows: Cell[][];
+      colHeaders?: string[];
+      rowHeaders?: string[];
+      /** compact square cells with no value text — a pixel canvas (tile decode) */
+      pixel?: boolean;
+    }
   | { kind: 'graph'; nodes: GraphNode[]; edges: GraphEdge[] }
   | { kind: 'list'; nodes: ListNode[]; pointers?: ListPointer[] }
   | { kind: 'hashtable'; buckets: HashBucket[] }
@@ -201,6 +226,7 @@ export type ViewState =
     }
   | { kind: 'network'; neurons: NetNeuron[]; edges: NetEdge[] }
   | { kind: 'table'; tables: DataTable[] }
+  | { kind: 'hex'; panes: HexPane[] }
   | {
       kind: 'conv';
       /** the input "image" (game board) */

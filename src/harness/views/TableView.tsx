@@ -16,6 +16,7 @@ function TableBlock({ t }: { t: DataTable }) {
   const lo = t.heatMin ?? Math.min(...t.rows.flat().map(Number).filter(Number.isFinite), 0);
   const hi = t.heatMax ?? Math.max(...t.rows.flat().map(Number).filter(Number.isFinite), 1);
   const flagged = new Set((t.flags ?? []).map((f) => `${f.row},${f.col}`));
+  const spot = t.highlightCell ? `${t.highlightCell.row},${t.highlightCell.col}` : null;
   return (
     <div className="dt-block">
       {t.name && <div className="dt-name">{t.name}</div>}
@@ -35,7 +36,9 @@ function TableBlock({ t }: { t: DataTable }) {
               {row.map((cell, c) => (
                 <td
                   key={c}
-                  className={`${t.heat ? 'heat' : ''}${flagged.has(`${r},${c}`) ? ' flag' : ''}`}
+                  className={`${t.heat ? 'heat' : ''}${flagged.has(`${r},${c}`) ? ' flag' : ''}${
+                    spot === `${r},${c}` ? ' spot' : ''
+                  }`}
                   style={t.heat ? heatStyle(cell, lo, hi) : undefined}
                 >
                   {cell}
