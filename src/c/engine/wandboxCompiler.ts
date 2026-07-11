@@ -67,7 +67,15 @@ export const wandboxCompiler: CCompiler = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({ compiler, code: source, stdin: opts.stdin ?? '', options: '' }),
+        // Link the math library so <math.h> (sqrt/sin/cos/…) resolves at link time —
+        // needed by the vectors/transforms exercises. Harmless for everything else.
+        body: JSON.stringify({
+          compiler,
+          code: source,
+          stdin: opts.stdin ?? '',
+          options: '',
+          'compiler-option-raw': '-lm',
+        }),
       });
       if (!res.ok) return engineError(`Compile service returned HTTP ${res.status}.`, t0);
 

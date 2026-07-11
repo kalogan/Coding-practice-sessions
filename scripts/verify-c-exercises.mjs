@@ -84,7 +84,8 @@ async function compileAndRun(source, stdin = '') {
   const res = await fetch(`${WANDBOX}/compile.json`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ compiler, code: source, stdin, options: '' }),
+    // Mirror the app engine (wandboxCompiler.ts): link libm so <math.h> resolves.
+    body: JSON.stringify({ compiler, code: source, stdin, options: '', 'compiler-option-raw': '-lm' }),
   });
   if (!res.ok) throw new Error(`compile.json HTTP ${res.status}`);
   const data = await res.json();
