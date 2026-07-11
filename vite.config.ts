@@ -8,6 +8,15 @@ import react from '@vitejs/plugin-react';
 // Both mount the SAME real components + SAME algorithm registry. Never a fork.
 export default defineConfig({
   plugins: [react()],
+  // Cross-origin isolation for the /c-programming route: the Wasmer clang
+  // toolchain uses SharedArrayBuffer, which requires COOP+COEP. `credentialless`
+  // still lets the CDN-hosted SDK + Pyodide load. (Prod mirrors this in vercel.json.)
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+    },
+  },
   build: {
     rollupOptions: {
       input: {
@@ -15,6 +24,7 @@ export default defineConfig({
         preview: 'preview.html',
         playground: 'playground.html',
         learn: 'learn.html',
+        c: 'c.html',
       },
     },
   },

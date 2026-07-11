@@ -1,0 +1,108 @@
+/* /c-programming IDE styling. Reuses the shared tokens from styles.css and the
+   editor styling from playground.css (imported by the C entry). */
+
+.c-ide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.c-editor-wrap {
+  min-height: 320px;
+  display: flex;
+}
+.c-editor-wrap .editor {
+  flex: 1;
+  min-height: 320px;
+}
+
+.c-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Run button — a comfortable touch target (>=44px) on every viewport. */
+.c-run {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.c-run:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Compiler-status pill in the header. */
+.pill.warm {
+  font-variant-numeric: tabular-nums;
+}
+.pill.warm-warming {
+  color: var(--muted);
+}
+.pill.warm-ready {
+  color: #06101f;
+  background: var(--accent);
+}
+.pill.warm-error {
+  color: #fff;
+  background: var(--danger, #b4232a);
+}
+
+/* Console */
+.c-console {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.c-console-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.c-console-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.c-console-meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.c-console-body {
+  margin: 0;
+  padding: 12px 14px;
+  max-height: 320px;
+  overflow: auto;
+  font-family: var(--editor-font, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.c-console-body.muted {
+  color: var(--muted);
+}
+.c-console-body.error {
+  color: var(--danger, #ff6b6b);
+}
+
+@media (max-width: 640px) {
+  .c-editor-wrap,
+  .c-editor-wrap .editor {
+    min-height: 240px;
+  }
+  .c-run {
+    width: 100%;
+  }
+}
