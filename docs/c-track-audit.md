@@ -75,10 +75,12 @@ and project reports.
 
 ## 4. Adjacent gaps to pick up (ranked by ROI for a working pro)
 
-1. **Tooling & debugging** *(highest ROI, biggest gap the sandbox hides)* — compiler flags
-   (`-Wall -Wextra -Werror -g -O2`), **gdb** (breakpoints, backtraces, inspecting memory), and
-   **valgrind** + **AddressSanitizer/UBSan** for memory bugs. Learning to *debug* C is as important as
-   writing it.
+1. **Tooling & debugging** *(highest ROI)* — compiler flags (`-Wall -Wextra -Werror -g -O2`), **gdb**
+   (breakpoints, backtraces, inspecting memory), and **valgrind** + **AddressSanitizer/UBSan** for memory
+   bugs. Learning to *debug* C is as important as writing it. **Partly closed now:** Module 21 · Tooling &
+   Debugging teaches these concepts through real bug-hunt exercises (fix an off-by-one, a NULL deref, a
+   double free) with the tools taught in the lessons — but actually *running* gdb/valgrind is still
+   something to practice on your own machine.
 2. **Build systems & multi-file projects** — actually splitting `.h`/`.c`, compiling and linking multiple
    translation units, and **make**/**CMake**. Module 14 gives the concept; do it for real on your machine.
 3. **Dynamic / real data structures** — growable arrays via `realloc`, **hash tables**, stacks/queues/heaps

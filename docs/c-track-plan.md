@@ -10,13 +10,14 @@ live in [`CLAUDE.md`](../CLAUDE.md); the method is
 [`docs/pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md`](pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md)._
 
 ## Standing state (2026-07-11) — curriculum buildout complete (core C + graphics track)
-- **120 sessions, 20 ordered modules** (grouped by the `module` + `order` fields, ascending):
+- **127 sessions, 21 ordered modules** (grouped by the `module` + `order` fields, ascending):
   1 · Values & Operators · 2 · Making Decisions · 3 · Loops · 4 · Functions & Recursion ·
   5 · Arrays · 6 · Text & Characters · 7 · Pointers & Memory · 8 · Structs & Enums ·
   9 · Reading Input (program mode) · 10 · Bit Manipulation · 11 · Data Structures in C ·
   12 · Matrices · 13 · The Matmul Ladder · 14 · The Preprocessor & Declarations ·
   15 · Files & Bigger Programs · 16 · Pointers, Level 2 · 17 · Vectors · 18 · 2D Transform Matrices ·
-  19 · 3D & the Camera · 20 · Software Rasterizer (projects a 3-D cube).
+  19 · 3D & the Camera · 20 · Software Rasterizer (renders a wireframe cube) ·
+  21 · Tooling & Debugging (bug-hunt exercises; gdb/valgrind/ASan taught in the lessons).
 - **The compile engine links `-lm`** (via Wandbox `compiler-option-raw`), so `<math.h>` (`sqrt`/`sin`/`cos`)
   works — needed by the vectors/transforms track. The verifier mirrors the same flag. File I/O
   (`fopen`/`fscanf`) also works in the sandbox (used by Module 15). See

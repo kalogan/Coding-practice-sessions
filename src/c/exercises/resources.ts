@@ -103,6 +103,11 @@ export const moduleResources: Record<string, CResource[]> = {
     { label: 'Scratchapixel — A Gentle Introduction to Computer Graphics', url: 'https://www.scratchapixel.com/lessons/3d-basic-rendering/get-started/gentle-introduction-to-computer-graphics-programming.html' },
     { label: 'raylib — a simple C library to actually draw (window + pixels)', url: 'https://www.raylib.com/' },
   ],
+  '21 · Tooling & Debugging': [
+    { label: "Beej's Quick Guide to GDB (beginner-friendly debugger tutorial)", url: 'https://beej.us/guide/bggdb/' },
+    { label: 'Valgrind — Quick Start Guide (find memory bugs)', url: 'https://valgrind.org/docs/manual/quick-start.html' },
+    { label: 'AddressSanitizer — the fast memory error detector', url: 'https://github.com/google/sanitizers/wiki/AddressSanitizer' },
+  ],
 };
 
 // Extra links for specific standout sessions, keyed by exercise id. Merged on top
