@@ -1,0 +1,905 @@
+# The Architect–Builder Pipeline
+
+*A methodology for delivering high-quality software with AI agents — fast, in
+parallel, and while the human is mostly AFK, without lowering the quality bar.*
+
+> **Audience:** this document is written for **both humans and machines.**
+> Humans read the prose to understand *why* the pipeline works and *when* to use
+> it. An orchestrating agent (e.g. a "lead" model supervising worker models) can
+> follow the **recipes, templates, and decision tables** in
+> [Part II](#part-ii--for-the-orchestrating-agent-machine-readable) directly.
+>
+> It is deliberately **project-agnostic.** A concrete worked example (the
+> *Wayfinders* MMORPG it was developed on) lives in the
+> [Appendix](#appendix--worked-example-wayfinders).
+>
+> **Companion doc — the Preview Harness.** The single highest-value verification
+> layer in this pipeline (the **lightweight runtime smoke** in §5b) is itself a
+> methodology. **`PREVIEW_HARNESS.md`** describes how to build and drive a
+> client-only, production-truthful preview that both a human (taste loop) and an
+> agent (runtime smoke) use to *see the assembled, running thing* in seconds — the
+> part the logic gate is blind to. Wherever this doc says "boot the preview tool,"
+> that's the harness. Read the two together.
+>
+> **Portable starter pack.** When dropping this methodology into a bare project
+> (e.g. a work folder with no studio infrastructure), bring the two files in
+> `pipeline-starter/` alongside this doc: **`PROJECT_CONTRACT.template.md`** (fill
+> it → it becomes the repo's `CLAUDE.md`/`AGENTS.md` — the standing constraints
+> every agent auto-loads) and **`TASTE_AND_REVIEW.template.md`** (the art-bible-lite
+> + domain checklists + review queue). This doc is the engine; those are the two
+> consumables it runs on.
+>
+> _Amended 2026-07 after a one-day 25-builder game build (CARAPACE): three commit
+> models (§6b), unverified-visual as a handoff blocker + environment capability
+> check (§5b), the release gate (§5d), dependency discipline (template A), live
+> steering before salvage (§6-recover), the review queue as drivable labs (§7),
+> and Director-side duties in the grill (§E)._
+
+---
+
+## TL;DR
+
+One human sets direction and judges quality. One **Architect** agent plans,
+interrogates, decomposes, dispatches, supervises, and *independently verifies*.
+Many **Builder** agents do focused, disjoint slices of work in parallel. Nothing
+a builder claims is trusted until the Architect re-runs the full gate with real
+exit codes. Work is checkpointed constantly so nothing is ever lost. The human
+is consulted only for the things only a human can decide — design forks, feel,
+and risky/irreversible actions — which is what makes being AFK safe. The same
+discipline runs in two cadences (§9): **AFK** for work the gate can judge, and a
+**Sync** taste loop for work only the Director's eye can judge — verification binds
+in both.
+
+The result: **massive parallel progress at a high, enforced quality bar, with the
+human in the loop only where their judgment is irreplaceable.**
+
+---
+
+## Part I — For humans
+
+### 1. The core idea
+
+Most "AI builds my app" workflows fail one of two ways:
+
+1. **Trust collapse.** The agent says "done, all tests pass," but they don't, and
+   nobody checked. Quality rots silently.
+2. **Human bottleneck.** The human has to babysit every step, so throughput is
+   capped at human attention and there's no real leverage.
+
+This pipeline fixes both by borrowing one idea from distributed systems:
+
+> **The Architect is authoritative. Everything a Builder reports is *untrusted
+> input* until independently verified.**
+
+(If that sounds familiar, it's the same "server authoritative, client is
+optimistic-cosmetic" rule that good multiplayer games use. Builders are the
+optimistic clients; the Architect is the authoritative server; the gate is the
+validation step. Never trust a client-reported "I scored a hit." Never trust a
+builder-reported "all green.")
+
+Around that one rule, everything else falls into place: you can run many builders
+at once (they're untrusted anyway, so verification is uniform), you can leave them
+unattended (the supervisor catches stalls and the gate catches lies), and you can
+keep the quality bar high (it's encoded as constraints + an automated gate, not as
+vigilance).
+
+### 2. The three roles
+
+| Role | Who | Owns | Never does |
+|---|---|---|---|
+| **Director** | The human | Direction, design authority, feel/taste, approvals, risk calls | Babysitting; writing the bulk of the code |
+| **Architect** | One "lead" agent (a strong reasoning model) | Planning, grilling, decomposition, dispatch, supervision, **independent verification**, recovery, documentation | Trusting a builder's self-report; doing risky/irreversible actions unattended |
+| **Builder** | Many "worker" agents (capable coding models), run in background | One disjoint, well-scoped slice each, to a defined gate | Touching another builder's files; destructive git; broad commits |
+
+The leverage comes from the **fan-out**: one Director, one Architect, *N* Builders.
+The Director spends minutes; the Architect spends the coordination effort once and
+amortizes it across many parallel builders; the Builders do the volume.
+
+### 3. The loop
+
+```
+        ┌─────────────────────────────────────────────────────────┐
+        │                      DIRECTOR (human)                     │
+        │   sets intent · answers grills · judges feel · approves   │
+        └───────────────▲───────────────────────────┬─────────────┘
+                        │ surfaces only              │ intent
+                        │ what needs judgment        ▼
+        ┌───────────────┴───────────────────────────────────────────┐
+        │                        ARCHITECT                           │
+        │                                                            │
+        │   1. GRILL    lock the design before building anything     │
+        │   2. PLAN     decompose into disjoint, sequenced slices    │
+        │   3. DISPATCH launch builders (scoped + constrained + gate)│
+        │   4. SUPERVISE health-check loop: liveness, stalls, deaths │
+        │   5. VERIFY   re-run the FULL gate with REAL exit codes    │
+        │   6. RECOVER  salvage → relaunch; fix small failures       │
+        │   7. PERSIST  update memory/roadmap; queue review items     │
+        │   8. ADVANCE  report + move to next slice (or stop-before)  │
+        └───────────────┬───────────────────────────────────────────┘
+                        │ disjoint slices              ▲ untrusted reports
+                        ▼                              │ (verified, never trusted)
+        ┌───────────────────────────────────────────────────────────┐
+        │   BUILDER   BUILDER   BUILDER   …   (parallel, background)  │
+        └───────────────────────────────────────────────────────────┘
+```
+
+The eight steps are not strictly linear — supervision (4) runs continuously while
+builders work, and grill→plan→dispatch can pipeline (you grill the *next* slice
+while the *current* one builds). But every slice passes through all eight.
+
+### 4. The eight steps, explained
+
+#### 1. Grill — lock the design before writing code
+Before building anything non-trivial, **interrogate the Director** until the design
+is unambiguous. Ambiguity compounds: a wrong assumption at design time becomes a
+wasted parallel fan-out. Force the key forks into explicit, mutually-exclusive
+choices and ask them as **structured questions** (2–4 at a time, each with crisp
+options and trade-offs). The Director answers in a minute; you build on rock.
+
+> **Heuristic:** if you can't write the builder's task without guessing, you
+> haven't grilled enough. Each unanswered fork is a question you owe the Director.
+
+#### 2. Plan — decompose into disjoint, sequenced slices
+Break the work into slices that are:
+- **Disjoint by file surface** — two slices that never touch the same files can run
+  in parallel safely. This is the single most important property for fan-out.
+- **Dependency-ordered** — if B builds on A, sequence them; don't fan out a chain.
+- **Gate-able** — each slice has a concrete, automated definition of done.
+
+Phase large features (e.g. a new subsystem) into a *sequence* of slices, each
+shippable and green on its own, rather than one giant slice.
+
+#### 3. Dispatch — launch builders with everything they need to succeed alone
+A builder runs **in the background** with no further conversation. So the dispatch
+prompt must be self-contained and carry five things (template in
+[Part II](#a-builder-dispatch-prompt-template)):
+1. **Scope** — exactly what to build and the file surface to stay within.
+2. **Context** — what already exists, what to read first, what *not* to redo.
+3. **Constraints** — the non-negotiable quality/architecture rules (§5).
+4. **Git + safety discipline** — targeted commits only, **committed incrementally
+   (one per layer/file, before the final gate)**, no destructive ops, no touching
+   other builders' surfaces, no risky/irreversible/external actions.
+5. **The gate** — the exact commands that define "done," run with real exit codes
+   and **each under a hard timeout** (a hung gate must fail fast, not block forever),
+   with the instruction to **stop and report rather than commit red.**
+
+#### 4. Supervise — the health-check loop that makes AFK safe
+While builders work, the Architect runs a **self-paced supervision loop**: wake
+periodically, check each builder's liveness, detect stalls and deaths, and recover.
+This is what lets the Director walk away. Key mechanics:
+- **Liveness = file-staleness + new commits. Nothing else.** The only trustworthy
+  signals are (a) the modification time of the **source files in the builder's
+  surface** and (b) new commits attributable to it. **Do NOT trust process counts**
+  ("`node` is running, so it's alive") and **do NOT trust a dirty working tree** —
+  both lie (see the next two bullets). Don't read the agent's own transcript/output
+  file either: it overflows context, and its mtime tracks chatter, not progress.
+- **Absolute stall/death test:** *newest source mtime in the builder's surface is
+  stale beyond a threshold (~15 min)* **AND** *no new commit from it in that window*
+  → treat as **dead**: salvage and relaunch — **regardless of how many processes are
+  running.**
+- **The zombie-gate trap (written in blood).** A builder that finishes its work then
+  runs a gate (`test`/`build`) can hang *forever* if the gate never exits — a common
+  cause is a test runner that won't terminate because a server/socket/DB/timer handle
+  was left open (the tests *pass*, the process just never quits). The hung gate
+  leaves orphaned `node` processes that look exactly like active work. A supervisor
+  that reads "processes present = alive" will babysit a corpse. We lost ~67 minutes
+  this way before switching to mtime+commits only. Prevent it at the source with gate
+  timeouts and commit-per-layer (§4-prevention below).
+- **Don't wait for the completion signal.** A hung or crashed builder never sends
+  one. The loop must *proactively* check mtime+commits **every** wake, not sit idle
+  waiting to be told a builder finished.
+- **A dirty tree is not "alive."** Uncommitted changes that aren't advancing are
+  stalled work, not progress. (On Windows with `autocrlf`, files can even show as
+  modified purely from line-ending normalization — *phantom dirt*. Confirm real
+  change with a diff that ignores EOL, e.g. `git diff --ignore-cr-at-eol`, before
+  reading anything into a dirty status.)
+- **Death/limit detection:** a builder can also hit a session/usage limit or crash
+  outright. Same response: salvage, relaunch.
+- **Keep the supervisor itself alive.** If the loop is session-bound and the host
+  machine can sleep, you'll get silent multi-hour gaps. Run a keep-awake guard
+  during AFK windows. *(Also written in blood — see Appendix.)*
+
+**§4-prevention — design builders that fail safe.** A hang or crash shouldn't cost
+the work *or* the wall-clock. Two rules, enforced at dispatch (and a third in the
+test suite):
+- **Commit per layer, before the final gate.** Each finished file/layer is its own
+  commit, so a hang loses at most the last increment — never the whole task. The
+  anti-pattern that bit us: do everything, commit once at the end → a hang right
+  before that commit risks *all* of it.
+- **Timeout every long command.** Wrap gates in a hard timeout (`timeout 600 <test>`,
+  `timeout 300 <build>`). This converts an infinite block into a fast, recoverable
+  failure (a timeout exit code = "investigate the hang," not "passed").
+- **Make tests exit cleanly.** Close every server/socket/DB handle in teardown and
+  set per-test/hook/teardown timeouts in the runner config, so the *runner* aborts a
+  stuck case instead of wedging the whole run.
+
+#### 5. Verify — independent gating with REAL exit codes
+**This is the heart of the pipeline.** When a builder reports "done, all green," the
+Architect **re-runs the full gate itself** and reads the **actual exit codes** — it
+does not trust the prose. A "balanced hard-gate" is fast, deterministic, and
+blocking:
+- typecheck · lint + architecture guards · unit tests (record the **counts**) ·
+  schema/migration golden fixtures · content/data lint · build.
+
+Trust nothing claimed; verify everything. Record the test counts every time so a
+silent drop (tests that vanished rather than passed) is visible. (Recipe and the
+real-exit-code trap in [Part II](#b-the-gate-real-exit-codes).)
+
+#### 6. Recover — steer, then salvage, then relaunch; fix small things inline
+- **Steer a LIVE builder first.** If a builder is alive but heading wrong (scope drift, new
+  Director feedback arrives mid-flight, a discovered constraint), send it a **mid-flight
+  message** with the correction — far cheaper than kill-and-relaunch, and it keeps the
+  builder's accumulated context. Relaunch is for the dead, not the misdirected.
+- **Small gate failure** (a lint nit, a one-line type error, a missing export): the
+  Architect fixes it directly. Don't round-trip a builder for a typo.
+- **Stall or death:** **salvage first** — commit the builder's uncommitted work as a
+  `wip(...)` checkpoint so nothing is lost — **then relaunch** a *continuation*
+  builder that picks up from that checkpoint. Never `reset --hard` away work.
+- **Coordination mess** (one builder's broad commit swept another's files): detect
+  it (verify each commit's file list), and correct without rewriting shared history
+  while a parallel builder is live.
+
+#### 7. Persist — write down state, queue what needs human eyes
+After each slice: update the durable **status/memory** (what's done, what's running,
+what's queued), mark **roadmap** progress, and append anything that needs the
+Director's *taste* (visual look, game feel, wording) to a **review queue** rather
+than blocking on it. Pattern: **write → persist → notify.**
+
+**Make the review queue DRIVABLE, not prose.** A taste item the Director can't *operate* isn't
+ready for review. For recurring art surfaces, build a **lab**: a dev screen that shows every
+variant as a **versioned A/B** (v1 = current, v2 = proposed, side-by-side), where the Director
+promotes the winner with a one-line flip — and the builder **never** points the live product at
+unreviewed art. (Proven pattern: sprite/tile/prop labs on a game; the same idea is a
+component-variant gallery on a website or a look-dev switcher in a viz app. This is the preview
+harness specialized to taste work.)
+
+#### 8. Advance — report, then move (or stop-before)
+Report to the Director in their terms: *what landed, how to try it, what's next.*
+Then either advance to the next queued slice autonomously, or — for anything past a
+predefined **safety boundary** — stop and ask. Autonomy is the default; the
+boundaries (§8) are the exceptions.
+
+### 5. The quality bar is the constraints
+
+The bar isn't enforced by vigilance — it's encoded as a short list of
+**non-negotiable constraints** handed to *every* builder, and checked by the gate.
+Make them few, explicit, and testable. Examples of the *kinds* of rules that belong
+here (yours will differ):
+- Architectural boundaries ("module X may not import Y") — enforced by an automated
+  guard, not by hope.
+- "The authoritative source is the server/core; clients are optimistic-cosmetic."
+- "Everything persisted is versioned and migrates forward; ship a golden fixture
+  with every schema change."
+- "Deterministic core: inject the clock and RNG; never call wall-clock or random
+  directly."
+- "Every new system ships with tests."
+
+If a rule matters, it goes in this list *and* in the gate. A rule that isn't
+gated will be violated.
+
+### 5b. The four dimensions — what the gate can and can't verify
+
+A useful lens for *what quality even means*: judge every change on four axes —
+**Functional** (does it do what it should?), **Craft** (how well?), **Contextual**
+(does it work in the real system?), and **PMF** (does it add value?). The automated
+gate is strongest at the bottom of the stack and thins out toward the top:
+
+| Dimension | Gate coverage | The gap |
+|---|---|---|
+| **Functional** | High for deterministic core logic; low for the *running, assembled* app | rendering, client prediction, cross-system flows — **tests pass while the visible thing is wrong** |
+| **Craft** | Mechanical (types, lint, arch-guards, test counts) | design, perf, duplication, *test depth* — on trust |
+| **Contextual** | Server-integration paths | full stack live (real DB/browser/GPU/latency/scale) + the *actual running instance* (stale-build masquerading as a bug) |
+| **PMF** | None (by nature) | fun / wanted / retained — needs real users |
+
+The consequence to internalize: **without extra layers, the human becomes the test
+harness for the top three-quarters of the stack** — every playtest is them running
+the checks the gate can't, which is both the throughput bottleneck and the risk.
+Two cheap layers claw back the most painful gaps:
+
+- **Lightweight runtime smoke (Architect-run) — via the Preview Harness.** After a
+  *visible* slice clears the logic gate, the Architect boots the **freshly-built**
+  app — or, for content/visual slices, the **client-only preview harness** (the
+  backend-free second entry that mounts the product's *real* components against
+  *real* data; full methodology in **`PREVIEW_HARNESS.md`**) — drives the key
+  screens **at a desktop *and* a mobile viewport** (§5c), screenshots, runs an
+  **a11y scan** (axe) + a keyboard tab-through, and scans the console/network. This is
+  the **single highest-value add above the logic gate**: it catches the
+  "green-but-broken," "breaks-on-a-phone," and "stale-build" classes before the human
+  ever sees them. Boot on alt ports; never
+  disturb the human's running instances; if a clean boot isn't possible, say so —
+  don't fake a green. **Know the harness's boundary:** it can only verify the code
+  paths it actually *mounts* — never claim "verified in the preview" for a path the
+  harness stubs or omits, and a green harness is never a green *system* (server/
+  persistence/netcode stay unverified). See `PREVIEW_HARNESS.md` §6.
+- **Adversarial code review on risky/large slices.** Schema changes,
+  server-authority/security code, and large slices get a diff-level review (design,
+  perf, subtle bugs the lint+tests miss). Small/cosmetic slices skip it to keep
+  throughput.
+
+**Harness vs. golden-run — the two visual layers are complements, not competitors.** The
+preview harness/labs **judge** (forward-looking: a human or agent drives NEW/changed work and
+decides "is this right?" — the only way to catch unknown-unknowns and author taste). The
+replay/golden-run **remembers the judgment** (backward-looking: a session approved in the harness
+is recorded — seed + inputs + key frames — and CI re-simulates + pixel-diffs it on every push, so
+UNCHANGED surfaces are guarded for free and no human re-verifies what didn't change). Goldens are
+*born in the harness*: judge → approve → record → guard. Intentional art changes SHOULD fail their
+golden — the workflow is lab A/B → the human promotes → re-record the golden. Keep goldens few and
+tolerant (key frames of stable-by-intent surfaces) or they become a maintenance tax. The
+UNVERIFIED-VISUAL blocker is satisfied by either layer: a real drive in the harness, or passing
+golden coverage. Replay additionally doubles as the time-travel debugger (re-simulate the exact
+run where something broke).
+
+**PMF stays a human call.** No gate can answer it — so name it explicitly as a
+standing risk (you can build beautifully-verified things nobody wants) and decide
+*deliberately* whether to seek real-user signal or keep building on conviction.
+Never let the green gate masquerade as product validation.
+
+**Environment capability check + the UNVERIFIED-VISUAL blocker (written in blood).**
+The smoke assumes the Architect *can* see pixels — verify that assumption at session
+start: can this environment screenshot? drive a browser? render GL/canvas? If any of
+those is unavailable, every visual claim degrades accordingly. Two hard rules:
+- **Builders (and the Architect) never claim visual verification they didn't
+  perform.** "Compiles + serves + modules transform" is NOT "renders correctly."
+  If a visible surface couldn't actually be observed, the report carries an explicit
+  **UNVERIFIED-VISUAL** label.
+- **An UNVERIFIED-VISUAL render-path change cannot ship.** It does not deploy and is
+  not handed off as done — it goes to the Director's review queue (or a lab, §7)
+  first. Two production breakages shipped past green gates precisely because
+  "couldn't verify visually" was treated as a footnote instead of a blocker: a tile
+  restyle that read muddy, and an atlas loader that mangled sprites while every test
+  passed. The gate was green both times; the pixels were wrong both times.
+
+### 5b-ii. Domain verification checklists — verify the property the user cares about
+
+The runtime smoke (§5b) is only as good as *what it checks for*. The failure mode is
+subtle: you verify the property that's **easy to render**, and it passes, while the
+property that actually **matters** is broken. A rig verification that checked "deforms
+smoothly" went green — while the limbs swung **backward**. Smoothness was the
+easy-to-see property; direction was the one that mattered. The smoke booted, drove,
+screenshotted, and *still* shipped a broken artifact, because nobody had written down
+"limbs must move in the correct direction" as a thing to look at.
+
+> **Rule:** for each recurring artifact domain, keep an **explicit checklist** of the
+> properties that must hold — and verify **each one by observation, not inference.**
+> "It rendered without error" is not "it's correct." Look at the thing and check the
+> box, or don't check it.
+
+The checklist is the domain's contribution to the four-dimensions gap (§5b): the
+*Functional/Contextual* properties no linter names, made concrete so the smoke can't
+skip them. Two worked examples of the shape:
+
+- **RIGS.** Deforms smoothly **AND** limbs move in the correct direction relative to
+  facing **AND** feet contact the floor (no float, no sink) **AND** every expected clip
+  is present *and* starts from a neutral pose. Any one false → red, no matter how good
+  the others look.
+- **UI CHANGES.** The Architect **boots the app and drives the changed surface** —
+  *clicks* it, not just *compiles* it — at the **real viewport**, before the Director
+  ever sees it. Compiling proves the code parses; it says nothing about whether the new
+  control works, or whether it broke a neighbor. Two bugs shipped to the Director this
+  week precisely because this was skipped: an overlay that **covered** an adjacent HP
+  bar, and a control that **wedged** after its first use. A boot-and-click smoke catches
+  both in seconds; a compile catches neither.
+
+Instantiate a checklist per domain the moment it recurs (template in
+[Part II](#i-domain-verification-checklist-template)); it becomes part of that domain's
+gate, verified in the smoke, never taken on a builder's say-so.
+
+### 5c. Accessibility and mobile are constraints, not polish
+
+For any product with a UI, two standing constraints belong on **every UI builder's
+list** — and they're the two most often deferred into oblivion: **accessibility
+(WCAG)** and **responsive / mobile-first design.** Both rot silently exactly like
+untested code, and both are far cheaper to build in than to retrofit. So they're not a
+final "a11y pass" or a "we'll make it responsive later" — they're rules handed to every
+builder up front and **gated like any other** (§5).
+
+- **Mobile is a first-class target, not an afterthought.** Design *and verify* at a
+  phone viewport from the first slice. "Responsive later" is a trap: the desktop-only
+  layout calcifies and the retrofit touches everything. Concretely — fluid layout that
+  reflows at ~320px, **touch targets ≥ 44px**, input that works by touch *and* keyboard,
+  **no hover-only affordances** (a phone has no hover), and safe-area / orientation
+  handling where it matters.
+- **Accessible by default (target WCAG 2.1 AA).** Semantic HTML + landmarks/roles; fully
+  **keyboard-operable with a visible focus ring**; every control has an accessible name
+  (label / `alt` / `aria-*`); **contrast ≥ the AA ratios** (4.5:1 text, 3:1 large/UI);
+  honor `prefers-reduced-motion`; never encode meaning by **color alone**.
+
+**Gate the mechanical part.** A big slice of both is automatable, so wire it into the
+gate (§B) like any other lint: a JSX/markup **a11y linter** (e.g. `eslint-plugin-jsx-a11y`),
+an automated **scan** in the runtime smoke (axe-core / Lighthouse / pa11y) for contrast,
+names, and roles, plus a **viewport check**. These catch the ~30–40 % that's mechanical —
+unlabeled inputs, missing `alt`, bad contrast, non-focusable controls — cheaply, every run.
+
+**The rest is the four-dimensions gap (§5b) — verify it, don't trust it.** Screen-reader
+flow, keyboard-only task completion, touch ergonomics, and real reflow at 320px are
+*Functional/Contextual* checks no linter makes. They live in the **runtime smoke** (drive
+the key screens **at a mobile viewport**, tab through with the keyboard, run the axe scan)
+and, for the judgment calls, the **review queue** — never on a builder's say-so.
+
+(Exempt only the genuinely UI-less — a headless library, a CLI, a pure data service. If it
+renders anything a human looks at or operates, both constraints apply.)
+
+### 5d. The release gate — "done" doesn't end at `build`
+
+The §5 gate proves the *source*; shipping needs three more checks, and both of the failures
+below shipped past a fully green gate:
+
+1. **Frozen-lockfile install** (`pnpm install --frozen-lockfile` or equivalent) — a
+   manifest/lockfile mismatch must fail *here*, in CI, not on the deploy host. (A builder once
+   committed a devDependency without syncing the lockfile; the gate was green locally and the
+   deploy died.)
+2. **Deploy, then verify the *deployed artifact*, not just an HTTP 200.** SPA rewrites return
+   `200` + HTML for **any** path — a missing asset masquerades as present. Check the
+   **Content-Type** of new assets, and stamp a **build hash/date visibly in the app** so a
+   playtest is never ambiguous about which build it's testing (module-singleton state and HMR
+   both lie; stale builds cost two ghost-chases in one day).
+3. **CI enforces all of it on every push** — remote + `ci.yml` running the gate is table stakes
+   for any repo that matters; a repo that exists on one disk is a bet against hardware.
+
+### 6. Why the parallelism is safe
+
+Two builders can run at once **iff their file surfaces are disjoint.** That's the
+whole trick. The Architect guarantees disjointness at plan time and re-checks it at
+dispatch. The remaining hazard is *git coordination* — a careless `git add .` in one
+builder sweeping another's files — so the discipline is **targeted adds only** and
+**verify every commit's file list** during supervision.
+
+### 6b. Three commit models — pick one per slice, at dispatch
+
+The original doc assumed one model (builders commit). Practice produced three; each is
+legitimate, and mixing them *unnamed* is how the Architect itself commits a broad-add sweep
+(it happened — two builders' staged files landed in one commit, swept by the *supervisor*):
+
+| Model | Who commits | When to use | Discipline |
+|---|---|---|---|
+| **Builder-commits** (default) | the builder, per layer, on the work branch | long AFK slices — salvage/checkpoint value is highest | targeted adds; commit-per-layer before the gate |
+| **Architect-commits** | builders leave work uncommitted; the Architect gates the combined tree, then commits per builder | fast parallel same-tree slices with short lifetimes | the Architect stages **strictly from each builder's reported file manifest** — the targeted-add rule binds the Architect too; never `git add -A` on a shared tree |
+| **Worktree + branch** | the builder, in an isolated git worktree on its own branch | slices that install dependencies, overlap another surface, or need review before merging (library promotions, risky refactors) | branch pushed for backup; the Architect reviews + merges; worktree cleaned after |
+
+Name the model in the dispatch prompt. If a slice grows past its model (e.g. a "fast" slice
+turns long), stop and re-dispatch rather than improvising.
+
+### 7. Cost-awareness (cadence)
+
+Supervision has a cost. Two practical levers:
+- **Don't poll work the harness will notify you about.** If completion triggers a
+  notification, set a long *fallback* heartbeat, not a tight poll.
+- **Respect cache windows.** Many agent runtimes cache context for a few minutes;
+  waking just past that window pays a full cache miss for nothing. Either stay
+  inside the window (short, frequent, cheap) or commit to a genuinely long wait
+  (amortize one miss over a long sleep). Avoid the worst-of-both middle.
+
+### 8. Safety boundaries (what the Architect never does unattended)
+
+Autonomy is bounded. Define, up front, the actions that **always** require the
+Director — and never cross them while AFK:
+- **Destructive/irreversible:** hard resets that discard work, force-pushes,
+  deleting data, dropping tables.
+- **External/side-effectful:** deploys needing real credentials, sending real
+  messages/emails, publishing, spending money, anything touching production.
+- **Designated risky features:** specific milestones the Director flagged as
+  "stop and check with me first" (e.g. a security-sensitive or
+  hard-to-reverse subsystem).
+- **Trust actions:** modifying access controls, secrets, or auth.
+
+Everything else is fair game unattended. When in doubt, **checkpoint and ask**
+rather than act.
+
+### 9. Two operating modes
+
+The pipeline runs in two legitimate modes. They are not a compromise on quality —
+they're the same discipline shaped to two different kinds of "done." Pick the mode
+from the **work type**, not from mood or convenience.
+
+- **AFK mode (the original).** The Director is away. Work flows through a **review
+  queue**; supervision runs in long loops; builders have full autonomy inside the
+  safety boundaries (§8). This is the right mode when **"done" is objective** — the
+  gate can decide it. Infra, pipeline, backend, data, refactors: the definition of
+  done is a green gate, so the human doesn't need to be in the room.
+- **Sync mode (the taste loop).** The Director is **present and playtesting**, giving
+  feedback at a minutes cadence — *"the walk is too slow," "the guard should kneel"* —
+  and the Architect **fixes, verifies, and redelivers** in tight cycles. This is the
+  right mode when **"done" is the Director's eye** — game-feel, visual, and audio work
+  where no gate can judge the result. The loop is a conversation, not a queue.
+
+**What still binds in sync mode.** Sync is a *cadence* change, not a discipline change.
+Every load-bearing rule survives:
+- **Independent verification before every handoff (§5).** Never show the Director
+  unverified work — not even in a fast loop. A redeliver that hasn't cleared its gate
+  (and its domain checklist, §5b-ii) is exactly the "green-but-broken" the pipeline
+  exists to stop. Speed is not an excuse to skip the re-run.
+- **Checkpoint commits (§4-prevention, §6).** Commit per increment. A live taste loop
+  is *more* churn, not less — losing the last ten fixes to a crash is worse mid-conversation.
+- **Safety boundaries (§8).** Present ≠ blanket approval. The stop-and-ask list still
+  holds; the Director being nearby doesn't authorize a force-push or a deploy.
+- **Fan-out for the parallelizable parts (§6).** A taste session can *still* run
+  background builders on **disjoint infra** while the Director and Architect iterate on
+  feel. Sync mode doesn't mean single-threaded — it means the *feel* work is
+  interactive while the disjoint plumbing keeps fanning out.
+
+**What relaxes.** Only the cadence machinery:
+- The **review queue collapses into live feedback** — items that would be *queued* for
+  a distant Director are answered in the moment instead.
+- **Supervision cadence follows the conversation** — you're not running long fallback
+  heartbeats against an absent human; you pace to the loop.
+
+| Work type | "Done" is decided by | Mode |
+|---|---|---|
+| Infra / pipeline / backend / data | the gate (objective) | **AFK** |
+| Refactor / migration / test coverage | the gate (objective) | **AFK** |
+| Game-feel / animation / movement tuning | the Director's eye | **Sync** |
+| Visual / layout / art direction | the Director's eye | **Sync** |
+| Audio / music / SFX feel | the Director's ear | **Sync** |
+| Mixed slice (infra + feel) | split it | **AFK** the infra, **Sync** the feel |
+
+The modes compose: a session is often **Sync in the foreground** (the Director iterating
+on feel) **over AFK builders in the background** (disjoint infra). What never changes,
+in either mode, is the authority rule (§1): nothing a builder claims is trusted until
+the Architect re-runs the gate.
+
+---
+
+## Part II — For the orchestrating agent (machine-readable)
+
+This part is written so an Architect agent can execute the pipeline directly. The
+commands assume a JS/TS monorepo; adapt the specifics, keep the structure.
+
+### A. Builder dispatch prompt template
+
+Fill every `<…>`. Launch in the background. One slice per builder.
+
+```
+You are building ONE focused slice of <PROJECT>. Repo: <ABS PATH> (<stack>).
+Branch: <work-branch> (commit ONLY here; <main-branch> stays clean).
+
+SCOPE: <exactly what to build>.
+STAY WITHIN THIS FILE SURFACE: <dirs/files>. Do NOT touch anything else.
+
+CONTEXT — read first, do NOT redo:
+- <already-built things / files to read to understand the seams>
+- <what exists that you must reuse, not reinvent>
+
+CONSTRAINTS (non-negotiable; also checked by the gate):
+- <constraint 1>  e.g. core stays engine-agnostic / no forbidden imports
+- <constraint 2>  e.g. server/source-of-truth authoritative
+- <constraint 3>  e.g. deterministic: inject clock+RNG, no wallclock/random
+- <constraint 4>  e.g. version everything + ship a golden fixture on schema change
+- <constraint 5>  e.g. every new system ships tests
+- <constraint 6> (UI slices) ACCESSIBLE by default — WCAG 2.1 AA: semantic markup,
+  keyboard-operable + visible focus, every control labeled, AA contrast, honor
+  reduce-motion, no color-only meaning. Checked by the a11y lint/scan.
+- <constraint 7> (UI slices) RESPONSIVE / MOBILE-FIRST — design + verify at a phone
+  viewport from the start; reflow at ~320px; touch targets ≥ 44px; no hover-only
+  affordances. (§5c)
+
+GIT + SAFETY DISCIPLINE:
+- ⚠️ TARGETED git add ONLY — `git add <each specific file>`. NEVER `git add -A`,
+  `git add .`, or `git add <dir>`. Other builders run in parallel on other
+  surfaces; a broad add will SWEEP their files into your commit. Verify
+  `git status` before every add.
+- NO `git reset --hard`. NO force-push. NO history rewrite (a parallel builder is live).
+- COMMIT PER LAYER, AS YOU GO — one commit per file/layer the moment it's done,
+  BEFORE the final gate. Do NOT batch all the work into one end-of-task commit (if
+  anything hangs before it, the whole task is lost). Clear messages + the project's
+  Co-Authored-By trailer.
+- No destructive/irreversible/external actions. No deploys. No background dev server
+  (use the test harness). Do not kill the human's running processes/ports.
+- ⚠️ NEVER add/remove/upgrade DEPENDENCIES. If the slice needs a package, STOP and
+  request it in your report — the Architect installs it with lockfile sync. On-demand
+  dev tools (headless browsers, bakers) are installed at use time, never committed.
+- If this slice changes anything VISIBLE and you cannot actually OBSERVE the result
+  in this environment (no screenshot/preview/GL), say so with an explicit
+  **UNVERIFIED-VISUAL** label. Never claim visual verification you did not perform —
+  "compiles + serves" is not "renders correctly." An UNVERIFIED-VISUAL render-path
+  change will NOT be shipped until a human or lab has seen it.
+- (art/feel slices) Build to the provided REFERENCE image + anti-reference; land the
+  result as a NEW VERSION in the lab/registry — do NOT point the live product at it.
+  The Director promotes art, never the builder.
+
+THE GATE (run with REAL exit codes, EACH UNDER A HARD TIMEOUT; do NOT trust a glance):
+- timeout <N> <typecheck cmd>      → exit 0
+- timeout <N> <lint + arch-guards> → exit 0   AND  <content/data lint> → exit 0
+- timeout <N> <a11y lint/scan>     → exit 0   (UI slices — jsx-a11y / axe)
+- timeout <N> <unit tests>         → exit 0   (report per-package COUNTS)
+- timeout <N> <golden/migration>   → exit 0
+- timeout <N> <build>              → exit 0
+A timeout (e.g. exit 124) means the command HUNG — do NOT treat as pass; report it
+and investigate the open-handle/non-exiting-process cause. If you CANNOT reach green,
+STOP and report the blocker. Do NOT commit red.
+
+REPORT: what you built, key decisions, anything needing human taste
+(look/feel/wording), and the EXACT gate exit codes + test counts.
+```
+
+### B. The gate (real exit codes)
+
+The classic trap: a pipe (`cmd | tee log`) reports the **pipe's** exit code, not the
+command's, so a failing step looks green. Capture the real code.
+
+```bash
+# bash — capture the actual command's exit code, not the pipe's
+set +e
+timeout 300 pnpm -r typecheck            ; tc=$?
+timeout 180 pnpm lint                    ; ln=$?
+timeout 180 pnpm lint:content            ; lc=$?
+timeout 120 pnpm lint:a11y               ; a11=$?   # UI projects: jsx-a11y / axe (skip if headless)
+timeout 600 pnpm -r test 2>&1 | tee /tmp/test.log ; tst=${PIPESTATUS[0]}   # ← real code, hard-capped
+timeout 300 pnpm -r build                ; bd=$?
+echo "typecheck=$tc lint=$ln content=$lc a11y=$a11 test=$tst build=$bd"
+# ALL must be 0. Exit 124 = the command HUNG (e.g. a non-exiting test process) — a
+# failure to investigate, NOT a pass. Then extract + RECORD the per-package test counts.
+```
+
+Rules for the verifying Architect:
+- **Never** trust a builder's "all green." Re-run this yourself.
+- **Always** run lint *and* content/data lint — they're the easiest to skip and the
+  cheapest to catch. On UI slices, the **a11y lint/scan** is in this same easy-to-skip,
+  cheap-to-catch bucket (§5c) — run it, and confirm the runtime smoke hit a mobile
+  viewport, not just desktop.
+- **Record the counts** each run. A drop from 673→640 with everything "green" means
+  tests were deleted or skipped, not passing.
+- A parallel builder may leave the tree transiently red on a *different* surface
+  (a symbol mid-add). Distinguish "my slice is broken" from "someone else's in-flight
+  edit" by filtering the failing package and re-checking just your surface.
+- **Cap every command with `timeout`.** The runner can hang (a test process that
+  never exits because a server/socket/DB handle was left open), which would otherwise
+  block the verify step forever. A timeout turns a hang into a fast, visible failure.
+- **Know your flaky tests.** Track any test that fails only under full-suite/parallel
+  load. If *only* that one fails, re-run it in isolation to confirm it's flake, not a
+  regression — don't let a known flake block the advance, and don't chase it as a bug.
+- **Before shipping, run the RELEASE gate too (§5d):** frozen-lockfile install → build →
+  deploy → verify the *deployed artifact* (asset **Content-Type**, not just HTTP 200 —
+  SPA rewrites 200 everything — and the visible build stamp matches the new commit).
+
+### C. Supervision check (run each wake)
+
+```bash
+git log --oneline -8          # new commits since last wake? whose? correct file list?
+git status --short            # uncommitted work present? on the expected surface?
+git diff --ignore-cr-at-eol --stat   # empty here = the "dirty" files are EOL-only phantom dirt
+# liveness per builder = NEWEST SOURCE-FILE mtime in its surface + new commits.
+# Stat the builder's dirs (e.g. PowerShell: Get-ChildItem -Recurse <surface> |
+#   sort LastWriteTime -Desc | select -First 1).  Do NOT read the agent's
+#   transcript/output file (overflows context) and do NOT count processes
+#   (a hung gate leaves zombie `node` procs that masquerade as alive — see §D).
+```
+
+Then apply the **stall test** and act.
+
+### D. Stall / death heuristic (decision table)
+
+Liveness is **source-file mtime + commits only.** Ignore process count and a
+static-but-dirty tree — both can read "alive" for a worker that is actually dead
+(a hung gate keeps zombie `node` processes *and* leaves uncommitted work sitting
+still). A real gate finishes in minutes, not tens of minutes.
+
+| newest source mtime (in surface) | new commit this window? | → verdict | action |
+|---|---|---|---|
+| fresh (< ~12–15 min) | — | **alive** | leave it |
+| stale | yes, recent | **alive** (committing) | leave it |
+| **stale > ~15 min** | **no** | **DEAD / STALLED** | salvage → relaunch — *even if `node` processes are running* |
+| reported limit / crash | — | **DEAD** | salvage → relaunch |
+
+**Salvage → relaunch:**
+```bash
+git add <only the builder's expected files>
+git commit -m "wip(<area>): <what> (stall/limit recovery checkpoint)
+KNOWN-RED: may be partial; continuation completes + greens.
+<Co-Authored-By trailer>"
+```
+Then launch a **continuation builder** (template A) whose CONTEXT states: what's
+already committed, the wip checkpoint and what it contains, and the exact remaining
+work + any known-red error to fix.
+
+### E. Grill pattern (lock design before building)
+
+When a request has open design forks, do **not** start building. Identify the 2–4
+decisions that most change the implementation, and ask them as structured,
+mutually-exclusive choices with trade-offs. Examples of high-leverage forks:
+core mechanic, data/movement model, fail-state/UX, generation/authoring approach,
+build-vs-reuse. Phrase options so the *consequence* of each is visible. Then
+synthesize the answers into the plan and dispatch — don't re-ask what's settled.
+
+Two additions learned the hard way:
+- **Art/feel slices require a REFERENCE before dispatch.** Adjectives under-constrain
+  art ("clean, bright, not busy" produced the opposite once). Ask the Director for one
+  reference image + one anti-reference ("this / not this") per art surface — refuse to
+  dispatch an art slice on adjectives alone. Capture them in the taste brief
+  (`TASTE_AND_REVIEW.template.md`).
+- **Chase the queued forks.** A question the Director scrolled past becomes a builder's
+  guess. Keep an explicit OPEN-FORKS list in the durable status and re-surface it at
+  every report until answered — one-word answers are fine; silence is not a decision.
+
+### F. Cadence (cost-aware self-pacing)
+
+- If completion **notifies** you, schedule a **long fallback heartbeat** (≈20–30 min)
+  and let notifications drive the real cadence. Don't tight-poll notified work.
+- If you must poll external state the harness can't see (CI, a deploy), match the
+  delay to how fast that state changes, and stay inside the context-cache window
+  (short) rather than just past it.
+- Don't pick the worst-of-both middle (just past the cache TTL): either stay short
+  and cheap, or go long and amortize the miss.
+
+### G. Persistence (write → persist → notify)
+
+- **Durable status/memory:** what's done, what's running (with IDs), what's queued,
+  the last known-green gate counts, and the active constraints. Update it every slice
+  so a fresh context (or a different agent) can resume cold.
+- **Review queue:** append anything needing human taste (look/feel/wording) instead
+  of blocking. The Director drains it on their schedule.
+- **Roadmap:** mark slices done; keep the next-up ordering explicit.
+
+### H. Mode selection (AFK vs Sync)
+
+Pick the mode from the work type before dispatching (§9). The discipline is identical;
+only the cadence and the review-queue-vs-live-feedback differ.
+
+| Signal | → Mode | Cadence | Review path | Fan-out |
+|---|---|---|---|---|
+| "done" = green gate (infra/pipeline/backend/data/refactor) | **AFK** | long supervision loops (§F) | **queue** taste items | full background fan-out |
+| "done" = Director's eye/ear (feel/visual/audio) | **Sync** | follow the conversation | **live feedback** in the loop | disjoint infra still fans out in the background |
+| mixed slice | **split** | Sync the feel, AFK the infra | live for feel, queue for infra | infra fans out under the taste loop |
+
+Invariant across both modes: **verify before every handoff (§5), commit per increment
+(§4-prevention), honor safety boundaries (§8).** Sync relaxes *only* the cadence and the
+queue — never the verification.
+
+### I. Domain verification checklist (template)
+
+For each recurring artifact domain (§5b-ii), instantiate this block and run it in the
+runtime smoke. Verify **each** property by observation; a green build is not a checked box.
+
+```
+DOMAIN: <e.g. rig | UI change | audio clip | generated mesh>
+VERIFY (each by observation, in the smoke — not inferred from "it built"):
+- [ ] <property 1 the user actually cares about>   e.g. limbs move in the CORRECT direction
+- [ ] <property 2>                                  e.g. deforms smoothly (no shattering)
+- [ ] <property 3>                                  e.g. feet contact the floor (no float/sink)
+- [ ] <property 4: completeness>                    e.g. every expected clip present + neutral start
+- [ ] <the neighbor check>                          e.g. the change didn't cover/wedge an adjacent control
+BOOT + DRIVE: <boot the app/preview, DRIVE the changed surface at the real viewport —
+              click it, don't just compile it — before the Director sees it>
+ANY box false → RED. Report which property failed; do NOT hand off.
+```
+
+---
+
+## When to use this (and when not)
+
+**Use it when:** the work decomposes into many disjoint slices; quality must stay
+high without constant human attention; the human's time is the scarce resource; and
+the work is mostly reversible (or the irreversible bits can be fenced behind §8).
+
+**Don't bother when:** the task is a single small change (just do it); the work is
+inherently serial and tiny (no fan-out to gain); or every step needs human judgment
+(then it's pairing, not orchestration).
+
+## Adapting to another project
+
+1. Write your **non-negotiable constraints** (§5) — few, explicit, testable.
+2. Define your **balanced hard-gate** (§B) — the fast deterministic commands that
+   block "done," and make sure each is *gated*, not just hoped-for.
+3. If the product has a UI, adopt the **accessibility (WCAG AA) + mobile-first**
+   constraints (§5c): wire an a11y lint/axe scan into the gate, and make the runtime
+   smoke drive a mobile viewport. (Skip only for genuinely headless projects.)
+4. Pick your **work branch** and the targeted-commit discipline.
+5. Identify your **safety boundaries** (§8) — the stop-and-ask list.
+6. Set up **durable status/memory + a review queue** (§G).
+7. Run the loop: grill → plan → dispatch (disjoint) → supervise → verify →
+   recover → persist → advance.
+
+## Glossary
+
+- **Director** — the human; sets direction and judges taste/feel; approves risk.
+- **Architect** — the lead agent; plans, dispatches, supervises, and *verifies*.
+- **Builder** — a background worker agent doing one disjoint slice.
+- **Slice** — a unit of work with a disjoint file surface and its own gate.
+- **Gate** — the deterministic command set that defines "done"; run with real exit
+  codes by the Architect, never trusted from a builder.
+- **Preview harness** — a backend-free second entry that mounts the product's *real*
+  components against *real* data, so a human (taste loop) and an agent (runtime
+  smoke) can see the assembled, running thing in seconds — the verification layer
+  above the logic gate for visual/content slices. Full methodology: `PREVIEW_HARNESS.md`.
+- **Runtime smoke** — the Architect's boot → drive → screenshot → scan-console check
+  of a visible slice (in the preview harness or the freshly-built app), catching the
+  "green-but-broken" / "stale-build" classes the logic gate can't see. On UI slices it
+  also drives a **mobile viewport** + runs an **a11y scan** (§5c).
+- **Accessibility & mobile constraints (§5c)** — for any UI product, two standing
+  builder constraints: WCAG 2.1 AA (semantic, keyboard, contrast, names, reduce-motion)
+  and responsive/mobile-first (reflow, 44px touch targets, no hover-only). Mechanical
+  part gated (jsx-a11y/axe + viewport); the rest verified in the smoke + review queue.
+- **Disjoint surface** — file sets that don't overlap, so builders can run in
+  parallel safely.
+- **Salvage → relaunch** — checkpoint a stalled/dead builder's work as `wip`, then
+  start a continuation from it.
+- **Stop-before** — a safety boundary the Architect won't cross unattended.
+- **Review queue** — a list of taste/feel/wording items surfaced to the Director
+  instead of blocking.
+- **AFK mode (§9)** — Director away; work flows through a review queue on long
+  supervision loops with full autonomy inside the safety boundaries. For work where
+  "done" is objective (the gate) — infra/pipeline/backend/data.
+- **Sync mode (§9)** — the taste loop: Director present and playtesting, giving
+  minutes-cadence feedback while the Architect fixes-verifies-redelivers in tight
+  cycles. For work where "done" is the Director's eye — game-feel/visual/audio. Only
+  the cadence and the review queue relax; verification, checkpoints, safety boundaries,
+  and background fan-out still bind.
+- **Domain verification checklist (§5b-ii)** — a per-domain list of the properties an
+  artifact must actually have (e.g. for a rig: correct limb direction, floor contact,
+  all clips present), each verified **by observation** in the runtime smoke — so the
+  smoke can't pass on the easy-to-render property while the one that matters is broken.
+
+---
+
+## Appendix — worked example (*Wayfinders*)
+
+*Wayfinders* is a browser-scale cozy MMORPG built with this pipeline. The Director
+(solo dev) playtests and sets direction; the Architect (a strong reasoning model)
+orchestrates; Builder agents (capable coding models) run in the background. Real
+moments that shaped the rules above:
+
+- **Independent verification caught "green" that wasn't.** Builders reported all
+  tests passing; the Architect's own gate run (with `${PIPESTATUS[0]}`) repeatedly
+  surfaced lint/content-lint/typecheck failures the prose had glossed. Hence:
+  *re-run the gate, read real exit codes, record counts.* (A clean unified gate here
+  is ~673 tests across five packages; recording the count makes a silent drop
+  visible.)
+- **The 6-hour AFK gap → keep-awake guard.** A session-bound supervision loop went
+  silent for hours because the host slept. Fix: a keep-awake guard during AFK
+  windows + absolute stall thresholds. Hence §4's "keep the supervisor itself alive."
+- **Broad-add sweeps → targeted adds only.** A builder's `git add .` swept a parallel
+  builder's audio files into an unrelated i18n commit (twice). Work survived, but
+  attribution was a mess. Hence the hard "targeted add only + verify each commit's
+  file list" rule.
+- **Session-limit mid-work → salvage-then-relaunch.** A localization builder hit its
+  usage limit ~75% done, leaving 7 components partially edited and one missing
+  export. The Architect committed the partial work as a `wip(i18n)` checkpoint and
+  launched a continuation to finish + green it — no work lost.
+- **The 67-minute zombie-gate hang → liveness = mtime + commits only.** A builder
+  finished a feature — complete *and* green — then its final test run hung without
+  exiting, leaving orphaned `node` processes. The supervisor's heuristic counted
+  those processes as "alive" and babysat the dead worker for over an hour before the
+  Director noticed. Two fixes: (1) liveness now keys on file-staleness + commits,
+  **never** process count or a static dirty tree; (2) every gate command runs under a
+  hard **timeout** so a hung gate fails fast. The salvaged work was 100% complete —
+  proving a builder can *finish yet hang before committing*, which is exactly why
+  **commit-per-layer** matters: had it committed each layer, nothing would have been
+  at risk regardless of the hang.
+- **Why gates hang (and how to stop it).** The usual culprit is a test runner that
+  won't terminate because a server/socket/DB handle (or timer) was left open — the
+  tests pass, the process just never exits. The Director's *own* running copy of the
+  app makes it likelier (held ports, memory contention, OS file locks). Prevention:
+  clean test teardown (close every server/handle), per-test/hook/teardown timeouts in
+  the test config, and the command-level `timeout` as the backstop.
+- **Phantom dirt on Windows.** With git `autocrlf`, files routinely show as modified
+  from line-ending normalization alone. A `git status` "dirty" worktree therefore is
+  *not* evidence of live work; confirm with `git diff --ignore-cr-at-eol` before
+  treating it as either progress or salvageable change.
+- **Stale-server vs real bug.** Many "bugs" the Director reported were an old running
+  server, not the code. Hence: when a report doesn't match the source, disambiguate
+  (restart/refresh) before chasing a ghost.
+- **Grilling before a big build.** For a new "flooded catacombs" biome (a deliberate
+  stress-test of the content pipeline), the Architect grilled the Director on four
+  forks — setting, movement model, survival mechanic + cozy fail-state, and
+  generation approach — *before* any code, then phased the build (swim → oxygen →
+  generator → content) into sequenced slices.
+- **Cozy design rules as constraints.** Director taste ("exposure should slow, not
+  kill"; "PvP opt-in only") became standing constraints handed to every relevant
+  builder — taste encoded as rules, not re-litigated per slice.
+- **Backward limbs passed a "smooth" check → domain checklists.** A character-rig
+  verification asked only "does it deform smoothly?" — it did, and went green, while the
+  limbs swung *backward* relative to facing. Smoothness was the easy-to-render property;
+  direction was the one that mattered, and nothing had told the smoke to look at it.
+  Hence §5b-ii: each recurring domain gets an explicit checklist (rig = smooth **and**
+  correct direction **and** feet on the floor **and** all clips present from neutral),
+  each box verified by *observation*, not inferred from a clean build.
+- **Two UI bugs shipped past a compile → boot-and-drive the surface.** Two changes
+  reached the Director broken because verification stopped at "it compiles": a tuning
+  panel that **covered the enemy HP bar**, and a slider that **wedged after first use**.
+  Both are invisible to a typecheck and obvious to a five-second boot-and-click. Hence
+  the UI half of §5b-ii: the Architect boots the app and *drives the changed surface* at
+  the real viewport — clicks it, checks the neighbors — before the Director ever sees it.
+
+The throughput this enabled: while the Director was AFK or away on a usage reset,
+disjoint builders delivered a gear loop, procedural audio + music, telegraphs,
+recall, a procedural boss, settings/menus, collision, localization, and more — each
+independently gated to green before the next advanced.

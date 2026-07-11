@@ -1,0 +1,34 @@
+# Save as .github/workflows/ci.yml — the gate on every push/PR.
+# Frozen-lockfile install IS part of the gate: a manifest/lockfile mismatch must
+# fail HERE, not on the deploy host (this exact failure class has shipped before).
+# Adapt package manager / commands to the project; keep the structure + timeouts.
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      # NOTE: pnpm needs run --if-present (npm-style "pnpm lint --if-present" FAILS
+      # when the script is absent — this exact bug broke a fresh repo's first CI).
+      - run: pnpm run --if-present lint
+      - run: pnpm run --if-present lint:content
+      - run: pnpm test
+      - run: pnpm build
+      # Optional but high-value once the replay/golden harness exists:
+      # - run: pnpm test:golden-run   # re-simulate an approved session + pixel-diff key frames
