@@ -149,6 +149,14 @@ export const CURRICULUM: CurriculumModule[] = [
     id: 'rom-hacking',
     title: 'ROM Hacking',
     blurb: 'How classic games packed everything into a tiny cartridge — and how you reverse it. Read a ROM as raw bytes, keep edits valid with a checksum, expand its compression, and decode its tile graphics into pixels.',
-    algoIds: ['hex-checksum', 'pointer-table', 'rle-decompress', 'tile-decode', 'palette-map'],
+    algoIds: [
+      'hex-checksum',
+      'pointer-table',
+      'game-genie',
+      'rle-decompress',
+      'lz-decompress',
+      'tile-decode',
+      'palette-map',
+    ],
   },
 ];
