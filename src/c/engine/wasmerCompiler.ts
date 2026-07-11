@@ -36,14 +36,29 @@ function loadToolchain(): Promise<{ sdk: WasmerSdk; clang: any }> {
   return toolchainPromise;
 }
 
+function free(x: any): void {
+  try {
+    x?.free?.();
+  } catch {
+    /* already freed / not freeable */
+  }
+}
+
+// Run an Instance to completion, then ALWAYS free it. Each run holds a worker
+// from the SDK's thread pool; without free() the pool exhausts after a handful
+// of compiles and the next run blocks forever (found the hard way in the smoke).
 async function readOut(handle: any): Promise<{ ok: boolean; code: number; stdout: string; stderr: string }> {
-  const out = await handle.wait();
-  return {
-    ok: !!out.ok,
-    code: typeof out.code === 'number' ? out.code : (out.ok ? 0 : 1),
-    stdout: out.stdout ?? '',
-    stderr: out.stderr ?? '',
-  };
+  try {
+    const out = await handle.wait();
+    return {
+      ok: !!out.ok,
+      code: typeof out.code === 'number' ? out.code : out.ok ? 0 : 1,
+      stdout: out.stdout ?? '',
+      stderr: out.stderr ?? '',
+    };
+  } finally {
+    free(handle);
+  }
 }
 
 export const wasmerCompiler: CCompiler = {
@@ -53,9 +68,11 @@ export const wasmerCompiler: CCompiler = {
 
   async compileAndRun(source: string, opts: CompileRunOptions = {}): Promise<CompileRunResult> {
     const t0 = performance.now();
+    let dir: any;
+    let prog: any;
     try {
       const { sdk, clang } = await loadToolchain();
-      const dir = new sdk.Directory();
+      dir = new sdk.Directory();
       await dir.writeFile('main.c', source);
 
       const build = await readOut(
@@ -76,7 +93,7 @@ export const wasmerCompiler: CCompiler = {
       }
 
       const bytes: Uint8Array = await dir.readFile('main.wasm');
-      const prog = await sdk.Wasmer.fromFile(bytes);
+      prog = await sdk.Wasmer.fromFile(bytes);
       const run = await readOut(
         await prog.entrypoint.run(opts.stdin !== undefined ? { stdin: opts.stdin } : {}),
       );
@@ -101,6 +118,11 @@ export const wasmerCompiler: CCompiler = {
         exitCode: null,
         ms: Math.round(performance.now() - t0),
       };
+    } finally {
+      // Release the per-compile Directory + program package (the toolchain
+      // itself stays cached). Instances are freed in readOut.
+      free(prog);
+      free(dir);
     }
   },
 };

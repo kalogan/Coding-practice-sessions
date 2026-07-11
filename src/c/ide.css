@@ -97,6 +97,137 @@
   color: var(--danger, #ff6b6b);
 }
 
+/* compiler-status line above the content */
+.c-topline {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2px;
+}
+
+/* Exercise ladder in the sidebar */
+.cx-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 6px 0 4px;
+}
+.cx-ladder-title {
+  margin: 6px 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cx-rung {
+  text-align: left;
+}
+
+/* Prompt text keeps the authored line breaks */
+.cx-prompt {
+  white-space: pre-wrap;
+}
+
+/* Secondary (ghost) action buttons */
+.ctl.ghost {
+  min-height: 44px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ctl.ghost:hover:not(:disabled) {
+  color: var(--fg, #fff);
+  border-color: var(--accent);
+}
+
+.cx-solution-code {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  font-family: var(--editor-font, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow: auto;
+}
+
+/* Check results */
+.cx-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cx-banner {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.cx-pass {
+  background: color-mix(in srgb, var(--ok, #2ea043) 22%, transparent);
+  color: var(--ok, #46d369);
+  border: 1px solid var(--ok, #2ea043);
+}
+.cx-fail {
+  background: color-mix(in srgb, var(--danger, #b4232a) 18%, transparent);
+  color: var(--danger, #ff6b6b);
+  border: 1px solid var(--danger, #b4232a);
+}
+.cx-caselist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cx-caselist li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.cx-case-name {
+  font-family: var(--editor-font, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 13px;
+}
+.cx-caselist li.ok .cx-case-name {
+  color: var(--ok, #46d369);
+}
+.cx-caselist li.bad .cx-case-name {
+  color: var(--danger, #ff6b6b);
+}
+.cx-diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+.cx-diff-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.cx-diff pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border-radius: 6px;
+  font-family: var(--editor-font, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 640px) {
   .c-editor-wrap,
   .c-editor-wrap .editor {
@@ -104,5 +235,8 @@
   }
   .c-run {
     width: 100%;
+  }
+  .cx-diff {
+    grid-template-columns: 1fr;
   }
 }

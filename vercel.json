@@ -8,14 +8,5 @@
     { "source": "/playground", "destination": "/playground.html" },
     { "source": "/learn", "destination": "/learn.html" },
     { "source": "/c-programming", "destination": "/c.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(c-programming|c.html)",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
-      ]
-    }
   ]
 }

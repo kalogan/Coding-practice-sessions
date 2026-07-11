@@ -47,20 +47,22 @@ Slice 0 gates everything; 1→2→3 sequential; content (4+) fans out once the m
 `pnpm typecheck` · `pnpm lint` · `pnpm test` (record counts) · `pnpm build` · `pnpm smoke`. The new
 `/c-programming` route joins the smoke drive. Visible changes are UNVERIFIED-VISUAL until SEEN.
 
-## Slice 0 result (spike, 2026-07-10) — PASS ✅
-Drove a throwaway prototype in the in-app browser; real Clang compiled + ran a hand-written matmul.
-- **Engine:** `@wasmer/sdk@0.10.0` (real unmodified Clang) via ESM from `unpkg` — **zero npm deps** added.
-- **Verified:** `crossOriginIsolated=true`; `clang example.c -o example.wasm` → `ok, exit 0`; produced wasm
-  ran → stdout `58 64 / 139 154` (correct 2×3·3×2 product); clean stderr. A 2nd program (Σ1..100=5050) also correct.
-- **Latency:** first-ever compile ~26–30s (toolchain streams + instantiates), **warm compile ~0.94s**. Same
-  shape as Pyodide (big first load, fast after) → warm the toolchain on route entry with a loading state + cache.
-- **Requirement found:** needs **cross-origin isolation** (COOP `same-origin` + COEP `credentialless`). Dev:
-  `vite.config` `server.headers`. **Prod: must add these headers in `vercel.json` for `/c-programming`** (Slice 1).
-- **Standing risk (Director call):** the ~30MB clang streams at runtime from **Wasmer's registry**, and the SDK
-  is **pre-1.0** (pin `@0.10.0`). Fallback #2 = self-host binji/wasm-clang (~15–20MB gzip vendored, no external
-  runtime dep, more wiring). **Awaiting approval: accept Wasmer-CDN engine, or switch to self-hosted binji?**
+## Engine decision (2026-07-10) — hosted gcc via Wandbox ✅
+Path taken after evaluating two client-side options and a hosted one:
+- **Slice-0 spike proved client-side Wasmer clang works** (compiled + ran a matmul in-browser), BUT the
+  runtime-smoke found a **worker-pool hang**: the Wasmer SDK wedges after ~3–5 compiles (leaked pooled
+  `Instance` workers; `free()` helped identify but didn't fully resolve). Green-but-broken under real use.
+- **Piston (hosted) was chosen to sidestep it — but the public API went whitelist-only on 2/15/2026** (401).
+- **Wandbox (hosted, public, no signup) is the live engine.** Verified: 10 back-to-back compiles, **zero
+  hangs**, all 5 reference solutions pass twice through; compile errors surface real gcc diagnostics; stdin
+  works (program mode). ~1.5s per compile (network). Pinned compiler resolved from `list.json` (`gcc-*-c`).
+- The engine sits behind `CCompiler` (`src/c/engine/index.ts` picks it) — swapping is a one-line change.
+  `wasmerCompiler.ts` kept as the offline alternative (has the hang); `wandboxCompiler.ts` is active.
+- **Trade-off accepted by Director:** needs network per run; code is sent to Wandbox's sandbox (fine for
+  practice code). No cross-origin-isolation / COOP-COEP needed (it's a plain `fetch`).
 
 ## Open items
-- **Engine approval** (above) — blocks Slice 1.
-- 5th Vite entry (`c.html`) + `vercel.json` rewrite `/c-programming` → `/c.html` **+ COOP/COEP headers** (Slice 1).
-- Smoke coverage for the new route (Slice 1+).
+- Smoke coverage for `/c-programming` (drive the route in CI). Note: the smoke would hit Wandbox live —
+  keep it a light DOM-mount check, not a full compile, to avoid a network dependency in CI.
+- Author the rest of the ladder (cache-aware → tiled → stretch matmul; more fundamentals).
+- Optional: a self-hosted Wandbox/Piston or a fixed client-side engine if Wandbox rate-limits become a problem.
