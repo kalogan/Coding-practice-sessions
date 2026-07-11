@@ -108,6 +108,11 @@ export const moduleResources: Record<string, CResource[]> = {
     { label: 'Valgrind — Quick Start Guide (find memory bugs)', url: 'https://valgrind.org/docs/manual/quick-start.html' },
     { label: 'AddressSanitizer — the fast memory error detector', url: 'https://github.com/google/sanitizers/wiki/AddressSanitizer' },
   ],
+  '22 · Your First Real Project': [
+    { label: 'ssloy/tinyrenderer — build a software renderer from scratch (~500 lines)', url: 'https://github.com/ssloy/tinyrenderer' },
+    { label: 'Wavefront .obj file format (Wikipedia)', url: 'https://en.wikipedia.org/wiki/Wavefront_.obj_file' },
+    { label: 'raylib — examples gallery (draw for real on your machine)', url: 'https://www.raylib.com/examples.html' },
+  ],
 };
 
 // Extra links for specific standout sessions, keyed by exercise id. Merged on top
