@@ -27,7 +27,7 @@ export const moduleResources: Record<string, CResource[]> = {
   ],
   '2 · Making Decisions': [
     { label: 'Programiz — if…else', url: 'https://www.programiz.com/c-programming/c-if-else-statement' },
-    { label: 'Programiz — switch', url: 'https://www.programiz.com/c-programming/switch-statement' },
+    { label: 'Programiz — switch…case', url: 'https://www.programiz.com/c-programming/c-switch-case-statement' },
   ],
   '3 · Loops': [
     { label: 'Programiz — for loop', url: 'https://www.programiz.com/c-programming/c-for-loop' },
@@ -80,8 +80,12 @@ export const moduleResources: Record<string, CResource[]> = {
 // Extra links for specific standout sessions, keyed by exercise id. Merged on top
 // of the session's module links.
 export const sessionResources: Record<string, CResource[]> = {
+  'add-two-ints': [
+    { label: 'Programiz — Getting Started with C', url: 'https://www.programiz.com/c-programming/getting-started' },
+    { label: 'freeCodeCamp — C Programming Tutorial for Beginners (full video)', url: 'https://www.youtube.com/watch?v=KJgsSFOSQv0' },
+  ],
   'celsius-to-fahrenheit': [
-    { label: 'Programiz — Type Conversion (int vs double)', url: 'https://www.programiz.com/c-programming/c-type-casting' },
+    { label: 'Programiz — Type Conversion (int vs double)', url: 'https://www.programiz.com/c-programming/type-conversion' },
   ],
   'make-range': [
     { label: 'cppreference — malloc', url: 'https://en.cppreference.com/w/c/memory/malloc' },
@@ -92,9 +96,17 @@ export const sessionResources: Record<string, CResource[]> = {
   'alloc-filled': [
     { label: 'cppreference — malloc', url: 'https://en.cppreference.com/w/c/memory/malloc' },
   ],
+  'matmul-naive': [
+    { label: '3Blue1Brown — Matrix multiplication as composition (intuition)', url: 'https://www.youtube.com/watch?v=XkY2DOUCWMU' },
+  ],
   'matmul-strassen': [
     { label: 'Inside code — Strassen algorithm (divide & conquer, video)', url: 'https://www.youtube.com/watch?v=OSelhO6Qnlc' },
     { label: "TutorialsPoint — Strassen's Matrix Multiplication", url: 'https://www.tutorialspoint.com/data_structures_algorithms/strassens_matrix_multiplication_algorithm.htm' },
+  ],
+  // The bridge to graphics: applying a matrix to a vector IS a transform.
+  'matrix-vector-mul': [
+    { label: 'LearnOpenGL — Transformations (matrices move points)', url: 'https://learnopengl.com/Getting-started/Transformations' },
+    { label: 'Scratchapixel — Geometry: Matrices', url: 'https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/matrices.html' },
   ],
 };
 

@@ -22,11 +22,11 @@ listed.
 - Programiz — C Operators: https://www.programiz.com/c-programming/c-operators
 - W3Schools — C Data Types & Operators: https://www.w3schools.com/c/c_data_types.php
 - (video) Neso Academy C playlist, "Operators" lectures: https://www.youtube.com/playlist?list=PLBlnK6fEyqRggZZgYpPMUxdY1CYkZtARR
-- Standout — `celsius-to-fahrenheit` (int vs double division): Programiz — Type Conversion: https://www.programiz.com/c-programming/c-type-casting
+- Standout — `celsius-to-fahrenheit` (int vs double division): Programiz — Type Conversion: https://www.programiz.com/c-programming/type-conversion
 
 ### 2 · Making Decisions
 - Programiz — if…else: https://www.programiz.com/c-programming/c-if-else-statement
-- Programiz — switch: https://www.programiz.com/c-programming/switch-statement
+- Programiz — switch…case: https://www.programiz.com/c-programming/c-switch-case-statement
 - W3Schools — C Conditions: https://www.w3schools.com/c/c_conditions.php
 
 ### 3 · Loops
