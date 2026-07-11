@@ -81,7 +81,18 @@ export const CURRICULUM: CurriculumModule[] = [
     id: 'linear-algebra',
     title: 'Linear Algebra for Games',
     blurb: 'The math under every rendered frame. Vectors for aiming and facing (dot & cross), then matrices to move, spin, scale, and un-transform every object on screen.',
-    algoIds: ['dot-product', 'cross-product', 'matrix-multiply', 'transform-2d', 'determinant', 'matrix-inverse'],
+    algoIds: [
+      'dot-product',
+      'cross-product',
+      'matrix-multiply',
+      'transform-2d',
+      'determinant',
+      'matrix-inverse',
+      'aabb-collision',
+      'sat-collision',
+      'raycast-dda',
+      'quaternion-rotate',
+    ],
   },
   {
     id: 'ml-foundations',
@@ -138,6 +149,6 @@ export const CURRICULUM: CurriculumModule[] = [
     id: 'rom-hacking',
     title: 'ROM Hacking',
     blurb: 'How classic games packed everything into a tiny cartridge — and how you reverse it. Read a ROM as raw bytes, keep edits valid with a checksum, expand its compression, and decode its tile graphics into pixels.',
-    algoIds: ['hex-checksum', 'rle-decompress', 'tile-decode'],
+    algoIds: ['hex-checksum', 'pointer-table', 'rle-decompress', 'tile-decode', 'palette-map'],
   },
 ];
