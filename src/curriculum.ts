@@ -78,6 +78,12 @@ export const CURRICULUM: CurriculumModule[] = [
     algoIds: ['minimax-alphabeta', 'mcts', 'self-play'],
   },
   {
+    id: 'linear-algebra',
+    title: 'Linear Algebra for Games',
+    blurb: 'The math under every rendered frame. Vectors for aiming and facing (dot & cross), then matrices to move, spin, scale, and un-transform every object on screen.',
+    algoIds: ['dot-product', 'cross-product', 'matrix-multiply', 'transform-2d', 'determinant', 'matrix-inverse'],
+  },
+  {
     id: 'ml-foundations',
     title: 'Machine Learning Foundations',
     blurb: 'The optimizer and the network under every learned bot: gradient descent, a tiny net + backprop, learning XOR, and a convnet that "sees".',
@@ -124,5 +130,14 @@ export const CURRICULUM: CurriculumModule[] = [
     title: 'Bot Pipeline · Imitation Learning & Serving',
     blurb: 'Train a model to copy the expert (behavioral cloning), serve it as a live bot (state → action), and x-ray the input tensor to catch data bugs before you commit.',
     algoIds: ['imitation-learning', 'serve-bot', 'tensor-xray'],
+  },
+
+  // ── Applied mini-track: reverse-engineering retro game ROMs — reading raw
+  //    bytes, decoding graphics, and keeping edits valid. ──
+  {
+    id: 'rom-hacking',
+    title: 'ROM Hacking',
+    blurb: 'How classic games packed everything into a tiny cartridge — and how you reverse it. Read a ROM as raw bytes, keep edits valid with a checksum, expand its compression, and decode its tile graphics into pixels.',
+    algoIds: ['hex-checksum', 'rle-decompress', 'tile-decode'],
   },
 ];
