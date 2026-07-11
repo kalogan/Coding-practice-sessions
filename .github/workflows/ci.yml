@@ -1,0 +1,34 @@
+# The gate on every push/PR (Architect–Builder pipeline §5d — the release gate).
+# Frozen-lockfile install IS part of the gate: a manifest/lockfile mismatch must
+# fail HERE, not on the Vercel deploy host. CI clones this repo standalone, so the
+# home-directory pnpm-workspace trap (see CLAUDE.md quirks) does NOT apply here —
+# a plain --frozen-lockfile install is correct on CI.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      # Runtime smoke: serve the freshly-built dist, drive all four screens +
+      # a mobile viewport, scan the console. Chromium is Linux-only here, which
+      # is exactly what CI provides (smoke can't run on the Windows dev box).
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm smoke
