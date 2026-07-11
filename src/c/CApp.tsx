@@ -8,8 +8,8 @@ import { cExercises, exercisesByModule, getExercise } from './exercises/registry
 type WarmState = 'warming' | 'ready' | 'error';
 type Mode = 'exercises' | 'sandbox';
 
-// The /c-programming IDE. Exercise-led ladder + a free sandbox, over a real clang
-// toolchain (Wasmer, WASM) that warms in the background on mount.
+// The /c-programming IDE. Exercise-led ladder + a free sandbox, over real gcc
+// (hosted via Wandbox) that warms in the background on mount.
 export function CApp() {
   const [warm, setWarm] = useState<WarmState>('warming');
   const [mode, setMode] = useState<Mode>('exercises');
@@ -82,9 +82,8 @@ export function CApp() {
           </a>
           <p className="boundary">
             Your <strong>real</strong> C is compiled and run by <strong>gcc</strong> on a sandboxed
-            server (the <a href="https://github.com/engineer-man/piston">Piston</a> service) and the
-            output streamed back — so it needs a network connection, and your code is sent to that
-            sandbox to run.
+            server (the <a href="https://wandbox.org">Wandbox</a> service) and the output streamed
+            back — so it needs a network connection, and your code is sent to that sandbox to run.
           </p>
         </>
       )}

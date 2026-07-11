@@ -1,8 +1,31 @@
 # C-Programming Track — Locked Design & Roadmap
 
-_Status: design locked (grilled 2026-07-10). Slice 0 (compile-engine spike) PASSED — engine pending Director approval.
-This is the resume-cold spec for the `/c-programming` feature. Binding constraints live in
-[`CLAUDE.md`](../CLAUDE.md); the method is [`docs/pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md`](pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md)._
+_Status: SHIPPED — a full **zero-to-hero curriculum of 81 taught sessions across 13 modules** is live at
+`/c-programming`, each session a right-side teacher lesson + one gcc-verified exercise, culminating in the
+matmul performance ladder (naive → transpose-for-cache → tiled → Strassen). Every reference is independently
+compiled on real gcc via [`scripts/verify-c-exercises.mjs`](../scripts/verify-c-exercises.mjs) before each
+deploy. Binding constraints live in [`CLAUDE.md`](../CLAUDE.md); the method is
+[`docs/pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md`](pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md)._
+
+## Standing state (2026-07-11) — curriculum buildout complete
+- **81 sessions, 13 ordered modules** (grouped by the `module` + `order` fields, ascending):
+  1 · Values & Operators · 2 · Making Decisions · 3 · Loops · 4 · Functions & Recursion ·
+  5 · Arrays · 6 · Text & Characters · 7 · Pointers & Memory · 8 · Structs & Enums ·
+  9 · Reading Input (program mode) · 10 · Bit Manipulation · 11 · Data Structures in C ·
+  12 · Matrices · 13 · The Matmul Ladder (capstone).
+- **Teacher panel:** [`src/c/LessonPanel.tsx`](../src/c/LessonPanel.tsx) renders a rich `lesson` (intro →
+  sections → worked example → why-it-matters → common mistakes → on-demand hint) as a RIGHT column in
+  [`ExerciseView`](../src/c/ExerciseView.tsx) — sticky on desktop, stacked on top on mobile (<900px). Every
+  session ships a lesson; the gate ([`src/c/__tests__/exercises.test.ts`](../src/c/__tests__/exercises.test.ts))
+  fails any session missing a non-empty `lesson.intro`, and enforces a 50-session / 10-module floor.
+- **Verification:** `pnpm verify:c` (node, no new deps; TypeScript strips the type-only import, `fetch` drives
+  Wandbox). Assembles each exercise like [`runner.ts`](../src/c/exercises/runner.ts) (function mode:
+  reference + harness; program mode: reference per case), POSTs to Wandbox with a pinned `gcc-*-c`, and asserts
+  the exact normalized output. Run before every batch commit — **81/81 pass**.
+- **Modes:** function-mode (write a named function; hidden harness calls it) for the early rungs; program-mode
+  (full `main` + stdin/stdout cases) from Module 9 onward.
+- **Next / open:** extend individual modules as desired (each new `*.cx.ts` is zero-wiring); optional recursive
+  Strassen on block submatrices as a further stretch rung; an opt-in matmul visualizer (Slice 3, still open).
 
 ## What it is
 A new `/c-programming` route: **write real C by hand, compile & run it in the browser**, with a
