@@ -1,9 +1,14 @@
 # Where to go next — finishing C + a path to graphics-with-matrices
 
 Written for someone newish to C (light Arduino a while back) whose north star is **graphics
-programming with matrices**. It has two parts: (1) the C topics still missing from the 13-module
+programming with matrices**. It has two parts: (1) the C topics still missing from the original 13-module
 ladder, and (2) a concrete, staged path from "I can write C" to "I can draw transformed 3D things,"
-with verified resources. Nothing here is built yet — it's the proposed plan.
+with verified resources.
+
+> **STATUS: BUILT ✅** — Modules 14–20 below are all shipped and live (120 sessions total, gcc-verified).
+> The engine now links `-lm` so the math track works. This doc stays as the map of *why* the modules
+> are ordered as they are and where to go once you leave the in-browser sandbox (raylib on your own
+> machine). Every resource link here is verified.
 
 ## The big picture (how the pieces fit)
 Graphics is, underneath, **linear algebra you can see**: every point of a 3D model is a vector, and

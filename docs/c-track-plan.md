@@ -1,18 +1,26 @@
 # C-Programming Track — Locked Design & Roadmap
 
-_Status: SHIPPED — a full **zero-to-hero curriculum of 81 taught sessions across 13 modules** is live at
-`/c-programming`, each session a right-side teacher lesson + one gcc-verified exercise, culminating in the
-matmul performance ladder (naive → transpose-for-cache → tiled → Strassen). Every reference is independently
-compiled on real gcc via [`scripts/verify-c-exercises.mjs`](../scripts/verify-c-exercises.mjs) before each
-deploy. Binding constraints live in [`CLAUDE.md`](../CLAUDE.md); the method is
+_Status: SHIPPED — a full **zero-to-hero-and-beyond curriculum of 120 taught sessions across 20 modules** is
+live at `/c-programming`, each session a right-side teacher lesson (+ "Go deeper" links) and one gcc-verified
+exercise. It climbs from `int` arithmetic through the matmul performance ladder (naive → transpose-for-cache
+→ tiled → Strassen) and on into a **graphics-with-matrices track** (vectors → 2D/3D transforms → a software
+rasterizer that projects a 3-D cube). Every reference is independently compiled on real gcc via
+[`scripts/verify-c-exercises.mjs`](../scripts/verify-c-exercises.mjs) before each deploy. Binding constraints
+live in [`CLAUDE.md`](../CLAUDE.md); the method is
 [`docs/pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md`](pipeline-starter/ARCHITECT_BUILDER_PIPELINE.md)._
 
-## Standing state (2026-07-11) — curriculum buildout complete
-- **81 sessions, 13 ordered modules** (grouped by the `module` + `order` fields, ascending):
+## Standing state (2026-07-11) — curriculum buildout complete (core C + graphics track)
+- **120 sessions, 20 ordered modules** (grouped by the `module` + `order` fields, ascending):
   1 · Values & Operators · 2 · Making Decisions · 3 · Loops · 4 · Functions & Recursion ·
   5 · Arrays · 6 · Text & Characters · 7 · Pointers & Memory · 8 · Structs & Enums ·
   9 · Reading Input (program mode) · 10 · Bit Manipulation · 11 · Data Structures in C ·
-  12 · Matrices · 13 · The Matmul Ladder (capstone).
+  12 · Matrices · 13 · The Matmul Ladder · 14 · The Preprocessor & Declarations ·
+  15 · Files & Bigger Programs · 16 · Pointers, Level 2 · 17 · Vectors · 18 · 2D Transform Matrices ·
+  19 · 3D & the Camera · 20 · Software Rasterizer (projects a 3-D cube).
+- **The compile engine links `-lm`** (via Wandbox `compiler-option-raw`), so `<math.h>` (`sqrt`/`sin`/`cos`)
+  works — needed by the vectors/transforms track. The verifier mirrors the same flag. File I/O
+  (`fopen`/`fscanf`) also works in the sandbox (used by Module 15). See
+  [`docs/c-graphics-roadmap.md`](c-graphics-roadmap.md) for the graphics learning path.
 - **Teacher panel:** [`src/c/LessonPanel.tsx`](../src/c/LessonPanel.tsx) renders a rich `lesson` (intro →
   sections → worked example → why-it-matters → common mistakes → on-demand hint) as a RIGHT column in
   [`ExerciseView`](../src/c/ExerciseView.tsx) — sticky on desktop, stacked on top on mobile (<900px). Every

@@ -75,6 +75,34 @@ export const moduleResources: Record<string, CResource[]> = {
     { label: 'MIT 6.172 — Lecture 1: Introduction & Matrix Multiplication (Leiserson)', url: 'https://www.youtube.com/watch?v=o7h_sYMk_oc' },
     { label: 'MIT 6.172 — full playlist (Lec 8 = Cache-Efficient Algorithms / tiling)', url: 'https://www.youtube.com/playlist?list=PLUl4u3cNGP63VIBQVWguXxZZi0566y7Wf' },
   ],
+  '14 · The Preprocessor & Declarations': [
+    { label: 'TutorialsPoint — Header Files in C', url: 'https://www.tutorialspoint.com/cprogramming/c_header_files.htm' },
+    { label: 'GeeksforGeeks — C Preprocessors & Macros', url: 'https://www.geeksforgeeks.org/c/cc-preprocessors/' },
+  ],
+  '15 · Files & Bigger Programs': [
+    { label: 'Programiz — C Files I/O (fopen/fprintf/fscanf)', url: 'https://www.programiz.com/c-programming/c-file-input-output' },
+    { label: 'GeeksforGeeks — File Handling in C', url: 'https://www.geeksforgeeks.org/c/basics-file-handling-c/' },
+  ],
+  '16 · Pointers, Level 2': [
+    { label: 'learn-c.org — Function Pointers', url: 'https://www.learn-c.org/en/Function_Pointers' },
+    { label: 'GeeksforGeeks — Function Pointer in C', url: 'https://www.geeksforgeeks.org/c/function-pointer-in-c/' },
+  ],
+  '17 · Vectors': [
+    { label: 'Freya Holmér — Vectors & Dot Product (Math for Game Devs, video)', url: 'https://www.youtube.com/watch?v=MOYiVLEnhrw' },
+    { label: '3Blue1Brown — Essence of Linear Algebra (playlist)', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab' },
+  ],
+  '18 · 2D Transform Matrices': [
+    { label: '3Blue1Brown — Matrix multiplication as composition (video)', url: 'https://www.youtube.com/watch?v=XkY2DOUCWMU' },
+    { label: 'Scratchapixel — Geometry: Matrices', url: 'https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/geometry/matrices.html' },
+  ],
+  '19 · 3D & the Camera': [
+    { label: 'LearnOpenGL — Coordinate Systems (Model→View→Projection)', url: 'https://learnopengl.com/Getting-started/Coordinate-Systems' },
+    { label: 'Scratchapixel — Building a Perspective Projection Matrix', url: 'https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix.html' },
+  ],
+  '20 · Software Rasterizer': [
+    { label: 'Scratchapixel — A Gentle Introduction to Computer Graphics', url: 'https://www.scratchapixel.com/lessons/3d-basic-rendering/get-started/gentle-introduction-to-computer-graphics-programming.html' },
+    { label: 'raylib — a simple C library to actually draw (window + pixels)', url: 'https://www.raylib.com/' },
+  ],
 };
 
 // Extra links for specific standout sessions, keyed by exercise id. Merged on top
