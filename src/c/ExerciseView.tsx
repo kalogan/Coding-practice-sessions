@@ -4,6 +4,7 @@ import { compiler } from './engine';
 import { runExercise } from './exercises/runner';
 import type { ExerciseRunResult } from './exercises/runner';
 import type { CExercise } from './exercises/types';
+import { resourcesFor } from './exercises/resources';
 import { LessonPanel } from './LessonPanel';
 
 interface Props {
@@ -31,7 +32,13 @@ export function ExerciseView({ exercise }: Props) {
 
   return (
     <div className="c-session">
-      {exercise.lesson && <LessonPanel lesson={exercise.lesson} title={exercise.title} />}
+      {exercise.lesson && (
+        <LessonPanel
+          lesson={exercise.lesson}
+          title={exercise.title}
+          resources={resourcesFor(exercise.module, exercise.id)}
+        />
+      )}
       <div className="c-session-main">
       <header className="algo-header">
         <div className="algo-meta">

@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Lesson } from './exercises/types';
+import type { CResource } from './exercises/resources';
 
 // Render text with blank-line paragraphs and inline `code` spans (backticks).
 // Deliberately tiny — lessons are plain prose, not full markdown.
@@ -24,10 +25,11 @@ function rich(text: string): ReactNode[] {
 interface Props {
   lesson: Lesson;
   title: string;
+  resources?: CResource[];
 }
 
 // The right-hand "teacher": explains the session before you write a line of code.
-export function LessonPanel({ lesson, title }: Props) {
+export function LessonPanel({ lesson, title, resources }: Props) {
   const [hintOpen, setHintOpen] = useState(false);
 
   return (
@@ -80,6 +82,23 @@ export function LessonPanel({ lesson, title }: Props) {
               {hintOpen ? 'Hide hint' : 'Show a hint'}
             </button>
             {hintOpen && <div className="lesson-body lesson-hint">{rich(lesson.hint)}</div>}
+          </section>
+        )}
+
+        {resources && resources.length > 0 && (
+          <section className="lesson-section lesson-resources" data-testid="lesson-resources">
+            <h4>Go deeper</h4>
+            <ul className="lesson-links">
+              {resources.map((r, i) => (
+                <li key={i}>
+                  <a href={r.url} target="_blank" rel="noopener noreferrer">
+                    {r.label}
+                    <span aria-hidden="true"> ↗</span>
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeOutput, outputsMatch, assembleFunctionSource } from '../exercises/runner';
 import { cExercises, getExercise, exercisesByModule } from '../exercises/registry';
+import { moduleResources, resourcesFor } from '../exercises/resources';
 import type { CExercise } from '../exercises/types';
 
 describe('normalizeOutput', () => {
@@ -74,6 +75,26 @@ describe('exercise registry (zero-wiring)', () => {
     for (const e of cExercises) {
       expect(e.lesson, `${e.id}: lesson`).toBeDefined();
       expect(e.lesson?.intro.trim().length, `${e.id}: lesson.intro`).toBeGreaterThan(0);
+    }
+  });
+
+  it('every module has "Go deeper" resources', () => {
+    for (const { module } of exercisesByModule()) {
+      expect(moduleResources[module], `${module}: resources`).toBeDefined();
+      expect(moduleResources[module].length, `${module}: resources`).toBeGreaterThan(0);
+    }
+  });
+
+  it('every session resolves a non-empty, https, deduped resource list', () => {
+    for (const e of cExercises) {
+      const links = resourcesFor(e.module, e.id);
+      expect(links.length, `${e.id}: resources`).toBeGreaterThan(0);
+      const urls = links.map((r) => r.url);
+      expect(new Set(urls).size, `${e.id}: deduped`).toBe(urls.length);
+      for (const r of links) {
+        expect(r.label.trim().length, `${e.id}: label`).toBeGreaterThan(0);
+        expect(r.url, `${e.id}: ${r.url} is https`).toMatch(/^https:\/\//);
+      }
     }
   });
 
